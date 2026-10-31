@@ -665,3 +665,49 @@ input {
     margin: 0;
   }
 }
+/* =========================
+   BANNER GEÇİŞLERİ
+========================= */
+
+.banner-slide {
+  opacity: 0;
+  transition: opacity 1.8s ease-in-out;
+  will-change: opacity, transform;
+}
+
+.banner-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+/* Yavaş yakınlaşma */
+
+.banner-slide.active.zoom-in {
+  animation: zoomInBanner 8s ease-in-out forwards;
+}
+
+@keyframes zoomInBanner {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.065);
+  }
+}
+
+/* Yavaş uzaklaşma */
+
+.banner-slide.active.zoom-out {
+  animation: zoomOutBanner 8s ease-in-out forwards;
+}
+
+@keyframes zoomOutBanner {
+  from {
+    transform: scale(1.065);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
