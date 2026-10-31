@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarihİz</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- SOL MENÜ -->
+    <aside class="sidebar">
+
+      <div class="brand">
+        <h1>Tarihİz</h1>
+        <p>Tarihin İzinde, Kanıtın Peşinde</p>
+      </div>
+
+      <nav class="wizard-menu">
+
+        <button class="nav-item active">
+          <span>01</span>
+          <strong>Tarihî İddia</strong>
+        </button>
+
+        <button class="nav-item">
+          <span>02</span>
+          <strong>Değerlendirme</strong>
+        </button>
+
+        <button class="nav-item">
+          <span>03</span>
+          <strong>Kaynaklar</strong>
+        </button>
+
+        <button class="nav-item">
+          <span>04</span>
+          <strong>Ankete Katıl</strong>
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="about-link">
+          ⓘ Hakkında
+        </button>
+      </div>
+
+    </aside>
+
+
+    <!-- ANA ALAN -->
+    <main class="workspace">
+
+      <!-- BANNER -->
+      <section class="banner">
+        <div class="banner-placeholder">
+          <h2>Tartışmalı Bir Tarihî İddiayı Araştırın</h2>
+        </div>
+      </section>
+
+
+      <!-- İDDİA GİRİŞ EKRANI -->
+      <section class="page-content">
+
+        <div class="claim-panel">
+
+          <p class="intro">
+            Araştırmak istediğiniz tartışmalı bir tarihî iddiayı yazın.
+          </p>
+
+          <div class="claim-input-wrapper">
+
+            <input
+              type="text"
+              id="claimInput"
+              placeholder="Örn. Fatih Sultan Mehmet zehirlenerek öldürüldü."
+              autocomplete="off"
+            >
+
+          </div>
+
+          <button id="researchButton" class="primary-button">
+            İddiayı Araştır
+            <span>→</span>
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
