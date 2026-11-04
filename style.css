@@ -711,3 +711,18 @@ input {
     transform: scale(1);
   }
 }
+header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 8%;
+}
+
+.site-logo {
+  width: 180px;
+  height: auto;
+  display: block;
+}
+
+.subtitle {
+  color: #536477;
+}
