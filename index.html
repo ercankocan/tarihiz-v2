@@ -1,139 +1,179 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tarihİz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tarihİz | Tarihsel Kaynak Sorgulama</title>
 
-  <link rel="stylesheet" href="style.css?v=3">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f7f6f2;
+      color: #172b44;
+    }
+
+    header {
+      background: #193653;
+      color: white;
+      padding: 22px 8%;
+    }
+
+    .brand {
+      font-family: Georgia, serif;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: #d4dfec;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 920px;
+      margin: 75px auto;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+
+    .intro {
+      color: #637184;
+      font-size: 17px;
+      line-height: 1.7;
+      max-width: 650px;
+      margin: 0 auto 44px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+
+    .option {
+      background: white;
+      border: 1px solid #e0e5ec;
+      border-radius: 16px;
+      padding: 35px 25px;
+      text-align: left;
+      box-shadow: 0 6px 24px rgba(0,0,0,.04);
+    }
+
+    .option h2 {
+      font-size: 22px;
+      margin: 0 0 15px;
+    }
+
+    .option p {
+      color: #667386;
+      line-height: 1.7;
+      min-height: 85px;
+    }
+
+    button {
+      border: 0;
+      background: #304f88;
+      color: white;
+      border-radius: 9px;
+      padding: 13px 22px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+
+    button:hover { background: #203e70; }
+
+    .icon {
+      font-size: 34px;
+      margin-bottom: 22px;
+    }
+
+    .notice {
+      margin-top: 32px;
+      color: #7c8795;
+      font-size: 13px;
+    }
+
+    @media (max-width: 650px) {
+      main { margin: 45px auto; }
+      h1 { font-size: 26px; }
+      .options { grid-template-columns: 1fr; }
+      .option p { min-height: 0; }
+    }
+  </style>
 </head>
 
 <body>
-
-  <div class="app">
-
-    <!-- SOL MENÜ -->
-    <aside class="sidebar">
-
-      <div class="brand">
-  <img
-    src="assets/tarihiz-logo.png?v=2"
-    alt="Tarihİz"
-    class="brand-logo"
-  >
-
-  <p>Tarihin İzinde
-    Kanıtın Peşinde</p>
-</div>
-
-      <nav class="wizard-menu">
-
-        <button class="nav-item active">
-          <span>01</span>
-          <strong>Tarihî İddia</strong>
-        </button>
-
-        <button class="nav-item">
-          <span>02</span>
-          <strong>Değerlendirme</strong>
-        </button>
-
-        <button class="nav-item">
-          <span>03</span>
-          <strong>Kaynaklar</strong>
-        </button>
-
-        <button class="nav-item">
-          <span>04</span>
-          <strong>Ankete Katıl</strong>
-        </button>
-
-      </nav>
-
-      <div class="sidebar-bottom">
-        <button class="about-link">
-          ⓘ Hakkında
-        </button>
-      </div>
-
-    </aside>
-
-
-    <!-- ANA ALAN -->
-    <main class="workspace">
-
-      <!-- BANNER -->
-      <section class="banner">
-
-  <div class="banner-slides" id="bannerSlides">
-
-    <div
-      class="banner-slide active"
-      style="background-image: url('assets/banner-01-genel.png');">
+  <header>
+    <div class="brand">Tarihİz</div>
+    <div class="subtitle">
+      Tarihin İzinde, Kanıtın Peşinde
     </div>
+  </header>
 
-    <div
-      class="banner-slide"
-      style="background-image: url('assets/banner-02-orta-asya.png');">
-    </div>
+  <main>
+    <h1>Tarihsel Kaynakları Keşfet ve Sorgula</h1>
 
-    <div
-      class="banner-slide"
-      style="background-image: url('assets/banner-03-selcuklu.png');">
-    </div>
+    <p class="intro">
+      Tarihsel belgeleri incele, kaynakların güçlü yönlerini
+      ve sınırlılıklarını değerlendir. Farklı kanıtları
+      karşılaştırarak kendi tarihsel yorumunu oluştur.
+    </p>
 
-    <div
-      class="banner-slide"
-      style="background-image: url('assets/banner-04-osmanli.png');">
-    </div>
+    <div class="options">
 
-    <div
-      class="banner-slide"
-      style="background-image: url('assets/banner-05-cumhuriyet.png');">
-    </div>
-
-  </div>
-
-
-</section>
-
-
-      <!-- İDDİA GİRİŞ EKRANI -->
-      <section class="page-content">
-
-        <div class="claim-panel">
-
-          <p class="intro">
-  Tarihî iddianızı yazın. Tarihİz, yapay zekâ desteğiyle akademik literatürü
-  ve web kaynaklarını araştırarak ilgili kaynakları belirler, farklı kanıtları
-  karşılaştırır ve kaynaklara dayalı bir değerlendirme sunar.
-</p>
-
-          <div class="claim-input-wrapper">
-
-            <input
-              type="text"
-              id="claimInput"
-              placeholder="Örn. Fatih Sultan Mehmet zehirlenerek öldürüldü."
-              autocomplete="off"
-            >
-
-          </div>
-
-          <button id="researchButton" class="primary-button">
-            İddiayı Araştır
-            <span>→</span>
-          </button>
-
-        </div>
-
+      <section class="option">
+        <div class="icon">📖</div>
+        <h2>Rehberli Öğrenme</h2>
+        <p>
+          Hazırlanmış tarihsel kaynaklarla çalış.
+          Yapay zekânın yönlendirici sorularıyla
+          değerlendirme becerilerini geliştir.
+        </p>
+        <button type="button" onclick="openMode('guided')">
+          Öğrenmeye Başla →
+        </button>
       </section>
 
-    </main>
+      <section class="option">
+        <div class="icon">🔎</div>
+        <h2>Serbest Sorgulama</h2>
+        <p>
+          Merak ettiğin tarihsel konuyu araştır.
+          Kaynakları incele, karşılaştır ve
+          kanıtlara dayalı sonuçlara ulaş.
+        </p>
+        <button type="button" onclick="openMode('free')">
+          Sorgulamaya Başla →
+        </button>
+      </section>
 
-  </div>
+    </div>
 
-  <script src="app.js?v=2"></script>
+    <p class="notice">
+      Yapay zekâ hazır cevap sunmaz; tarihsel düşünmene
+      ve sorgulamana rehberlik eder.
+    </p>
+  </main>
 
+  <script>
+    function openMode(mode) {
+      const name = mode === "guided"
+        ? "Rehberli Öğrenme"
+        : "Serbest Sorgulama";
+
+      alert(name + " ekranını sonraki adımda oluşturacağız.");
+    }
+  </script>
 </body>
 </html>
