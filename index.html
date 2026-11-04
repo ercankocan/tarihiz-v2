@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -168,12 +167,12 @@
 
   <script>
     function openMode(mode) {
-      const name = mode === "guided"
-        ? "Rehberli Öğrenme"
-        : "Serbest Sorgulama";
-
-      alert(name + " ekranını sonraki adımda oluşturacağız.");
-    }
+  if (mode === "guided") {
+    window.location.href = "guided.html";
+  } else {
+    alert("Serbest Sorgulama bölümü hazırlanıyor.");
+  }
+}
   </script>
 </body>
 </html>
