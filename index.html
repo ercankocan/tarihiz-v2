@@ -5,6 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tarihİz | Tarihsel Kaynak Sorgulama</title>
 
+/* Logo ve üst bölüm */
+header {
+  background: #ffffff;
+  color: #193653;
+  padding: 12px 6%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.site-logo {
+  width: 150px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.subtitle {
+  color: #536477;
+  font-size: 15px;
+  margin: 0;
+}
+
+/* Banner alanı */
+.banner-slider {
+  position: relative;
+  width: 100%;
+  height: clamp(190px, 29vw, 370px);
+  overflow: hidden;
+  background: #193653;
+}
+
+.banner-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.banner-slide.active {
+  opacity: 1;
+}
+
+main {
+  margin: 36px auto;
+}
+
+@media (max-width: 650px) {
+  header {
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .site-logo {
+    width: 125px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner-slide {
+    transition: none;
+  }
+}
   <style>
     * { box-sizing: border-box; }
 
@@ -33,6 +103,27 @@
       font-size: 14px;
     }
 
+<div class="banner-slider">
+  <img class="banner-slide active"
+       src="assets/banner-01-genel.png"
+       alt="Tarihsel kaynaklar">
+
+  <img class="banner-slide"
+       src="assets/banner-02-orta-asya.png"
+       alt="Orta Asya tarihi">
+
+  <img class="banner-slide"
+       src="assets/banner-03-selcuklu.png"
+       alt="Selçuklu tarihi">
+
+  <img class="banner-slide"
+       src="assets/banner-04-osmanli.png"
+       alt="Osmanlı tarihi">
+
+  <img class="banner-slide"
+       src="assets/banner-05-cumhuriyet.png"
+       alt="Cumhuriyet tarihi">
+</div>
     main {
       max-width: 920px;
       margin: 75px auto;
@@ -176,6 +267,19 @@
   } else {
     alert("Serbest Sorgulama bölümü hazırlanıyor.");
   }
+}
+    
+const slides = document.querySelectorAll(".banner-slide");
+let currentBanner = 0;
+
+if (slides.length > 1) {
+  setInterval(() => {
+    slides[currentBanner].classList.remove("active");
+
+    currentBanner = (currentBanner + 1) % slides.length;
+
+    slides[currentBanner].classList.add("active");
+  }, 5000);
 }
   </script>
 </body>
