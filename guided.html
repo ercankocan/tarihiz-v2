@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tarihİz | Rehberli Öğrenme</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f7f6f2;
+      color: #172b44;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    header {
+      background: #193653;
+      color: white;
+      padding: 20px 7%;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      font-family: Georgia, serif;
+      font-size: 27px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 36px auto;
+      padding: 0 18px;
+    }
+
+    .subtitle {
+      color: #67758a;
+      margin-bottom: 25px;
+    }
+
+    .progress {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .progress span {
+      flex: 1;
+      padding: 12px 5px;
+      text-align: center;
+      font-size: 12px;
+      background: #e7eaf0;
+      color: #6a7789;
+      border-radius: 8px;
+    }
+
+    .progress span.active {
+      background: #304f88;
+      color: white;
+      font-weight: bold;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid #e1e5eb;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 5px 22px rgba(0,0,0,.04);
+    }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    h2 { margin-top: 0; }
+
+    p { line-height: 1.75; }
+
+    .source {
+      background: #f6f2e9;
+      border-left: 4px solid #b69b66;
+      padding: 20px;
+      border-radius: 7px;
+      margin: 22px 0;
+      line-height: 1.8;
+    }
+
+    .info {
+      background: #f0f4fa;
+      padding: 16px;
+      border-radius: 9px;
+      line-height: 1.9;
+    }
+
+    .question {
+      font-weight: 600;
+      margin-top: 23px;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 105px;
+      padding: 14px;
+      border: 1px solid #cdd5df;
+      border-radius: 9px;
+      font: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: 2px solid #7896c5;
+    }
+
+    .hint {
+      background: #f1f4fa;
+      padding: 16px;
+      margin: 15px 0;
+      border-radius: 9px;
+      line-height: 1.7;
+    }
+
+    .previous {
+      background: #f4f5f7;
+      padding: 15px;
+      border-radius: 9px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.7;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      gap: 12px;
+    }
+
+    button {
+      background: #304f88;
+      color: white;
+      border: none;
+      border-radius: 9px;
+      padding: 13px 24px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #203e70; }
+
+    button.secondary {
+      background: #e8ebf0;
+      color: #253b56;
+    }
+
+    .message {
+      color: #236247;
+      font-weight: 600;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 600px) {
+      .panel { padding: 20px; }
+      .progress span { font-size: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <a href="index.html">Tarihİz</a>
+</header>
+
+<main class="container">
+  <h1>Rehberli Öğrenme</h1>
+  <p class="subtitle">
+    Tarihsel kaynakları incele, sorgula ve kendi
+    değerlendirmelerini oluştur.
+  </p>
+
+  <div class="progress">
+    <span class="active">1. Kaynak</span>
+    <span>2. Değerlendir</span>
+    <span>3. Rehberlik</span>
+    <span>4. Yeniden Yaz</span>
+  </div>
+
+  <div class="panel">
+
+    <!-- ADIM 1 -->
+    <section class="step active">
+      <h2>Kaynağı İncele</h2>
+
+      <p>
+        Önce belgenin kaynak bilgilerini incele.
+        Daha sonra içeriğini oku.
+      </p>
+
+      <div class="info">
+        <strong>Kaynağın türü:</strong> Asker mektubu<br>
+        <strong>Yazar:</strong> Joseph F. Green<br>
+        <strong>Tarih:</strong> 2 Ocak 1863<br>
+        <strong>Alıcı:</strong> Julia Reynolds<br>
+        <strong>Bağlam:</strong> Amerikan İç Savaşı,
+        Fredericksburg Muharebesi sonrası
+      </div>
+
+      <div class="source">
+        <strong>Belgenin içeriği – Türkçe özet</strong>
+        <p>
+          Birlik Ordusu askeri Joseph F. Green,
+          arkadaşına yazdığı mektupta
+          Fredericksburg Muharebesi sonrasında
+          askerlerin moralinin bozulduğunu ve
+          ordunun belirli koşullarda firarlarla
+          karşılaşabileceğini anlatmaktadır.
+        </p>
+      </div>
+
+      <p class="question">
+        Tarihsel soru:
+      </p>
+
+      <p>
+        Bu mektup, Birlik Ordusu'nun tamamının
+        moral durumunu anlamak için
+        ne ölçüde güçlü bir kanıttır?
+      </p>
+    </section>
+
+    <!-- ADIM 2 -->
+    <section class="step">
+      <h2>İlk Değerlendirmeni Yap</h2>
+
+      <p>
+        Kaynak bilgilerini ve içeriği düşünerek
+        aşağıdaki soruları kendi ifadelerinle yanıtla.
+      </p>
+
+      <p class="question">
+        1. Bu mektubun güçlü bir tarihsel kanıt
+        olmasını sağlayan özellikler nelerdir?
+      </p>
+
+      <textarea id="firstStrength"
+        placeholder="Görüşünü gerekçeleriyle yaz..."></textarea>
+
+      <p class="question">
+        2. Bu mektubun kanıt olarak
+        sınırlılıkları nelerdir?
+      </p>
+
+      <textarea id="firstLimit"
+        placeholder="Görüşünü gerekçeleriyle yaz..."></textarea>
+    </section>
+
+    <!-- ADIM 3 -->
+    <section class="step">
+      <h2>Değerlendirmeni Yeniden Düşün</h2>
+
+      <p>
+        İlk yanıtlarını gözden geçir.
+        Aşağıdaki sorular sana yol gösterebilir.
+      </p>
+
+      <div class="hint">
+        <strong>Soru 1:</strong><br>
+        Mektubun yazarı olaylara ne kadar yakındır?
+        Bu durum kaynağın değerini nasıl etkiler?
+      </div>
+
+      <div class="hint">
+        <strong>Soru 2:</strong><br>
+        Tek bir askerin gözlemleri bütün ordunun
+        durumunu temsil edebilir mi?
+      </div>
+
+      <div class="hint">
+        <strong>Soru 3:</strong><br>
+        Mektubun yazıldığı tarih, bütün savaş
+        boyunca askerlerin moralini açıklamak
+        açısından nasıl bir sınırlılık oluşturabilir?
+      </div>
+
+      <p class="subtitle">
+        Bu ilk sürümde sorular örnektir.
+        Sonraki aşamada yapay zekâ,
+        senin yanıtlarına göre sorular oluşturacak.
+      </p>
+    </section>
+
+    <!-- ADIM 4 -->
+    <section class="step">
+      <h2>Son Değerlendirmeni Oluştur</h2>
+
+      <p>
+        İlk değerlendirmeni yeniden oku.
+      </p>
+
+      <h3>İlk yanıtların</h3>
+      <div class="previous" id="previousAnswer"></div>
+
+      <p class="question">
+        Şimdi kaynağın güçlü ve sınırlı yönlerini
+        dikkate alarak daha gerekçeli
+        bir değerlendirme yaz.
+      </p>
+
+      <textarea id="finalAnswer"
+        placeholder="Son değerlendirmeni buraya yaz..."></textarea>
+
+      <p id="doneMessage" class="message"
+        hidden>
+        Etkinliği tamamladın. Bu deneme sürümünde
+        yanıtların henüz sunucuya kaydedilmiyor.
+      </p>
+    </section>
+
+    <div class="navigation">
+      <button type="button" class="secondary"
+        id="backButton" onclick="previousStep()">
+        Geri
+      </button>
+
+      <button type="button" id="nextButton"
+        onclick="nextStep()">
+        Devam Et →
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  let currentStep = 0;
+
+  const steps = document.querySelectorAll(".step");
+  const indicators = document.querySelectorAll(".progress span");
+
+  function showStep() {
+    steps.forEach((step, index) => {
+      step.classList.toggle("active", index === currentStep);
+    });
+
+    indicators.forEach((item, index) => {
+      item.classList.toggle("active", index === currentStep);
+    });
+
+    document.getElementById("backButton").style.visibility =
+      currentStep === 0 ? "hidden" : "visible";
+
+    document.getElementById("nextButton").textContent =
+      currentStep === 3 ? "Tamamla" : "Devam Et →";
+
+    if (currentStep === 3) {
+      const strength =
+        document.getElementById("firstStrength").value;
+
+      const limitation =
+        document.getElementById("firstLimit").value;
+
+      document.getElementById("previousAnswer").textContent =
+        "Güçlü yönler:\n" + strength +
+        "\n\nSınırlılıklar:\n" + limitation;
+    }
+  }
+
+  function nextStep() {
+    if (currentStep === 1) {
+      const strength =
+        document.getElementById("firstStrength").value.trim();
+
+      const limitation =
+        document.getElementById("firstLimit").value.trim();
+
+      if (!strength || !limitation) {
+        alert("Lütfen iki soruyu da yanıtla.");
+        return;
+      }
+    }
+
+    if (currentStep === 3) {
+      const finalText =
+        document.getElementById("finalAnswer").value.trim();
+
+      if (!finalText) {
+        alert("Lütfen son değerlendirmeni yaz.");
+        return;
+      }
+
+      document.getElementById("doneMessage").hidden = false;
+      document.getElementById("nextButton").disabled = true;
+      return;
+    }
+
+    currentStep++;
+    showStep();
+  }
+
+  function previousStep() {
+    if (currentStep > 0) {
+      currentStep--;
+      showStep();
+    }
+  }
+
+  showStep();
+</script>
+
+</body>
+</html>
