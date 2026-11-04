@@ -3,284 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tarihİz | Tarihsel Kaynak Sorgulama</title>
-
-/* Logo ve üst bölüm */
-header {
-  background: #ffffff;
-  color: #193653;
-  padding: 12px 6%;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.site-logo {
-  width: 150px;
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.subtitle {
-  color: #536477;
-  font-size: 15px;
-  margin: 0;
-}
-
-/* Banner alanı */
-.banner-slider {
-  position: relative;
-  width: 100%;
-  height: clamp(190px, 29vw, 370px);
-  overflow: hidden;
-  background: #193653;
-}
-
-.banner-slide {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0;
-  transition: opacity 1s ease;
-}
-
-.banner-slide.active {
-  opacity: 1;
-}
-
-main {
-  margin: 36px auto;
-}
-
-@media (max-width: 650px) {
-  header {
-    justify-content: center;
-    text-align: center;
-    gap: 8px;
-  }
-
-  .site-logo {
-    width: 125px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .banner-slide {
-    transition: none;
-  }
-}
+  <title>Tarihİz | Tarihsel Kaynak Değerlendirme</title>
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: "Segoe UI", Arial, sans-serif;
       background: #f7f6f2;
       color: #172b44;
     }
-
     header {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      min-height: 108px;
+      padding: 10px max(24px, calc((100vw - 1100px) / 2));
+      background: #fff;
+      border-bottom: 1px solid #e1e5ea;
+    }
+    .site-logo {
+      display: block;
+      width: 155px;
+      max-width: 100%;
+      height: auto;
+    }
+    .subtitle { font-size: 15px; line-height: 1.5; color: #536477; }
+    .banner-slider {
+      position: relative;
+      height: clamp(180px, 27vw, 340px);
+      overflow: hidden;
       background: #193653;
-      color: white;
-      padding: 22px 8%;
     }
-
-    .brand {
-      font-family: Georgia, serif;
-      font-size: 32px;
-      font-weight: bold;
+    .banner-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transition: opacity 1s ease;
     }
-
-    .subtitle {
-      margin-top: 5px;
-      color: #d4dfec;
-      font-size: 14px;
-    }
-
-<div class="banner-slider">
-  <img class="banner-slide active"
-       src="assets/banner-01-genel.png"
-       alt="Tarihsel kaynaklar">
-
-  <img class="banner-slide"
-       src="assets/banner-02-orta-asya.png"
-       alt="Orta Asya tarihi">
-
-  <img class="banner-slide"
-       src="assets/banner-03-selcuklu.png"
-       alt="Selçuklu tarihi">
-
-  <img class="banner-slide"
-       src="assets/banner-04-osmanli.png"
-       alt="Osmanlı tarihi">
-
-  <img class="banner-slide"
-       src="assets/banner-05-cumhuriyet.png"
-       alt="Cumhuriyet tarihi">
-</div>
+    .banner-slide.active { opacity: 1; }
     main {
-      max-width: 920px;
-      margin: 75px auto;
+      max-width: 980px;
+      margin: 38px auto 60px;
       padding: 0 24px;
       text-align: center;
     }
-
-    h1 {
-      font-size: 32px;
-      margin-bottom: 15px;
-    }
-
+    h1 { margin: 0 0 12px; font-size: clamp(25px, 3vw, 34px); }
     .intro {
+      max-width: 700px;
+      margin: 0 auto 32px;
       color: #637184;
-      font-size: 17px;
+      font-size: 16px;
       line-height: 1.7;
-      max-width: 650px;
-      margin: 0 auto 44px;
     }
-
-    .options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 22px;
-    }
-
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .option {
-      background: white;
-      border: 1px solid #e0e5ec;
-      border-radius: 16px;
-      padding: 35px 25px;
+      padding: 28px;
       text-align: left;
-      box-shadow: 0 6px 24px rgba(0,0,0,.04);
+      background: #fff;
+      border: 1px solid #e0e5ec;
+      border-radius: 15px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .04);
     }
-
-    .option h2 {
-      font-size: 22px;
-      margin: 0 0 15px;
-    }
-
-    .option p {
-      color: #667386;
-      line-height: 1.7;
-      min-height: 85px;
-    }
-
+    .option .icon { font-size: 32px; }
+    .option h2 { margin: 14px 0 8px; font-size: 21px; }
+    .option p { color: #667386; line-height: 1.6; min-height: 78px; }
     button {
       border: 0;
-      background: #304f88;
-      color: white;
+      padding: 12px 20px;
       border-radius: 9px;
-      padding: 13px 22px;
-      font-size: 15px;
+      background: #304f88;
+      color: #fff;
+      font: inherit;
       cursor: pointer;
-      margin-top: 14px;
     }
-
     button:hover { background: #203e70; }
-
-    .icon {
-      font-size: 34px;
-      margin-bottom: 22px;
-    }
-
-    .notice {
-      margin-top: 32px;
-      color: #7c8795;
-      font-size: 13px;
-    }
-
+    button:focus-visible { outline: 3px solid #c5ac6a; outline-offset: 3px; }
+    .notice { margin-top: 27px; color: #7c8795; font-size: 13px; }
     @media (max-width: 650px) {
-      main { margin: 45px auto; }
-      h1 { font-size: 26px; }
+      header { justify-content: center; text-align: center; flex-direction: column; gap: 4px; }
+      .site-logo { width: 130px; }
+      main { margin-top: 28px; }
       .options { grid-template-columns: 1fr; }
       .option p { min-height: 0; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      .banner-slide { transition: none; }
+    }
   </style>
 </head>
-
 <body>
   <header>
-    <div class="brand">
-  <img src="assets/tarihiz-logo.png"
-       alt="Tarihİz Logosu"
-       class="site-logo">
-</div>
-    <div class="subtitle">
-      Yapay Zekâ Destekli Tarihsel Kaynak Değerlendirme Platformu
-    </div>
+    <a href="index.html" aria-label="Tarihİz ana sayfa">
+      <img class="site-logo" src="assets/tarihiz-logo.png" alt="Tarihİz logosu">
+    </a>
+    <div class="subtitle">Yapay Zekâ Destekli Tarihsel Kaynak Değerlendirme Platformu</div>
   </header>
+
+  <div class="banner-slider" aria-label="Tarih dönemlerinden görseller">
+    <img class="banner-slide active" src="assets/banner-01-genel.png" alt="Tarihsel görseller">
+    <img class="banner-slide" src="assets/banner-02-orta-asya.png" alt="Orta Asya tarihi">
+    <img class="banner-slide" src="assets/banner-03-selcuklu.png" alt="Selçuklu tarihi">
+    <img class="banner-slide" src="assets/banner-04-osmanli.png" alt="Osmanlı tarihi">
+    <img class="banner-slide" src="assets/banner-05-cumhuriyet.png" alt="Cumhuriyet tarihi">
+  </div>
 
   <main>
     <h1>Tarihsel Kaynakları Keşfet ve Sorgula</h1>
-
     <p class="intro">
-      Tarihsel belgeleri incele, kaynakların güçlü yönlerini
-      ve sınırlılıklarını değerlendir. Farklı kanıtları
-      karşılaştırarak kendi tarihsel yorumunu oluştur.
+      Tarihsel belgeleri incele, kaynakların güçlü yönlerini ve sınırlılıklarını değerlendir.
+      Farklı kanıtları karşılaştırarak kendi tarihsel yorumunu oluştur.
     </p>
 
     <div class="options">
-
       <section class="option">
-        <div class="icon">📖</div>
+        <div class="icon" aria-hidden="true">📖</div>
         <h2>Rehberli Öğrenme</h2>
-        <p>
-          Hazırlanmış tarihsel kaynaklarla çalış.
-          Yapay zekânın yönlendirici sorularıyla
-          değerlendirme becerilerini geliştir.
-        </p>
-        <button type="button" onclick="openMode('guided')">
-          Öğrenmeye Başla →
-        </button>
+        <p>Hazırlanmış tarihsel kaynaklarla çalış. Yapay zekânın yönlendirici sorularıyla değerlendirme becerilerini geliştir.</p>
+        <button type="button" onclick="openMode('guided')">Öğrenmeye Başla →</button>
       </section>
-
       <section class="option">
-        <div class="icon">🔎</div>
+        <div class="icon" aria-hidden="true">🔎</div>
         <h2>Serbest Sorgulama</h2>
-        <p>
-          Merak ettiğin tarihsel konuyu araştır.
-          Kaynakları incele, karşılaştır ve
-          kanıtlara dayalı sonuçlara ulaş.
-        </p>
-        <button type="button" onclick="openMode('free')">
-          Sorgulamaya Başla →
-        </button>
+        <p>Merak ettiğin tarihsel konuyu araştır. Kaynakları incele, karşılaştır ve kanıtlara dayalı sonuçlara ulaş.</p>
+        <button type="button" onclick="openMode('free')">Sorgulamaya Başla →</button>
       </section>
-
     </div>
 
-    <p class="notice">
-      Yapay zekâ hazır cevap sunmaz; tarihsel düşünmene
-      ve sorgulamana rehberlik eder.
-    </p>
+    <p class="notice">Yapay zekâ hazır cevap sunmaz; tarihsel düşünmene ve sorgulamana rehberlik eder.</p>
   </main>
 
   <script>
     function openMode(mode) {
-  if (mode === "guided") {
-    window.location.href = "guided.html";
-  } else {
-    alert("Serbest Sorgulama bölümü hazırlanıyor.");
-  }
-}
-    
-const slides = document.querySelectorAll(".banner-slide");
-let currentBanner = 0;
+      if (mode === "guided") {
+        window.location.href = "guided.html";
+      } else {
+        alert("Serbest Sorgulama bölümü hazırlanıyor.");
+      }
+    }
 
-if (slides.length > 1) {
-  setInterval(() => {
-    slides[currentBanner].classList.remove("active");
-
-    currentBanner = (currentBanner + 1) % slides.length;
-
-    slides[currentBanner].classList.add("active");
-  }, 5000);
-}
+    const slides = document.querySelectorAll(".banner-slide");
+    let currentBanner = 0;
+    if (slides.length > 1 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setInterval(() => {
+        slides[currentBanner].classList.remove("active");
+        currentBanner = (currentBanner + 1) % slides.length;
+        slides[currentBanner].classList.add("active");
+      }, 5000);
+    }
   </script>
 </body>
 </html>
