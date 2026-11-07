@@ -180,7 +180,7 @@ async function route(request, path) {
     try { body=JSON.parse(raw||'{}'); } catch { throw new HttpError(400,'Geçerli JSON gönder.'); }
     requireCondition(body&&typeof body==='object'&&!Array.isArray(body),'Geçerli JSON nesnesi gönder.',400);
   }
-  if (path==='/session'&&method==='POST') {
+  if ((path==='/session'||path==='/')&&method==='POST') {
     requireCondition(typeof body.code==='string'&&body.code.trim().length>=8&&body.code.length<=80,'Katılım kodunu kontrol et.');
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     await budget('login:'+ip,12,300);
