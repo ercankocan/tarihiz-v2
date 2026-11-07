@@ -1,0 +1,134 @@
+'use strict';
+const CFG=window.TARIHIZ_CONFIG;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=x=>structuredClone(x);
+const singleSteps=['Kaynak Bilgileri','Belgeyi İncele','İlk Değerlendirme','Yapay Zekâ ile Sorgulama','Son Değerlendirme','Değerlendirmelerimi Karşılaştır'];
+const multiSteps=['Kaynakları İncele','İlk Karşılaştırma','Yapay Zekâ ile Sorgulama','Son Karşılaştırma','Nihai Tarihsel Sonuç'];
+const tableFields=[['evidence','Kaynağın sunduğu kanıtlar'],['strengths','Kanıtların güçlü yönleri'],['limits','Kanıtların sınırlılıkları'],['judgment','Genel değerlendirme']];
+const compareFields=[['support','Kaynaklar hangi noktalarda birbirini destekliyor?'],['conflict','Kaynaklar arasında hangi farklılıklar veya çelişkiler bulunuyor?'],['result','Kaynakların güçlü ve sınırlı yönlerini dikkate alarak nasıl bir sonuca ulaşıyorsun?']];
+let activity=CFG.preview?window.TARIHIZ_PREVIEW_ACTIVITY:null;
+let token='',work=null,works=[],page='home',sourceIndex=0,showText=false,mobile='source',fieldIndex=0,busy=false,dirty=false,saveTimer=null,saveQueue=Promise.resolve(),lastError='';
+const LOCAL='tarihiz-30-preview-v1';
+function initialState(){return {cursor:0,unlocked:0,answers:{meta:'',metaAddendum:'',documentNote:'',singleFirst:{evidence:'',strengths:'',limits:'',judgment:''},singleFinal:{evidence:'',strengths:'',limits:'',judgment:''},multiFirst:{support:'',conflict:'',result:''},multiFinal:{support:'',conflict:'',result:''},conclusion:'',singleDraft:'',multiDraft:''},chats:{single:{messages:[],ready:false},multi:{messages:[],ready:false}}};}
+function currentGroup(step=work.state.cursor){return step<6?'single':'multi';}
+function fieldKey(step=work.state.cursor){return ({0:work.state.unlocked>0?'metaAddendum':'meta',1:'documentNote',2:'singleFirst',4:'singleFinal',7:'multiFirst',9:'multiFinal',10:'conclusion',3:'singleDraft',8:'multiDraft'})[step];}
+function fieldsFor(step){return [2,4].includes(step)?tableFields.map(([k,l])=>[k,k==='judgment'&&step===4?'Gerekçeli son kararın':l]):compareFields;}
+function filled(v){return typeof v==='string'?!!v.trim():v&&Object.values(v).every(x=>typeof x==='string'&&!!x.trim());}
+function locked(step=work.state.cursor){const u=work.state.unlocked;return (step===2&&u>2)||(step===4&&u>5)||(step===7&&u>7)||(step===9&&u>10)||(step===10&&u>10);}
+function message(s,error=false){$('#status').textContent=s;$('#status').style.color=error?'#a33b2b':'';}
+function fail(e){lastError=e.message;const el=$('#error');if(el)el.textContent=e.message;message(e.message,true);}
+async function request(path,method='GET',body){const r=await fetch(CFG.apiBase.replace(/\/$/,'')+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{})});if(!r.ok){const err=await r.json().catch(()=>({}));throw Error(typeof err.detail==='string'?err.detail:'İşlem tamamlanamadı. Yanıtların ekranda korunuyor.');}return r.json();}
+function readLocal(){try{return JSON.parse(localStorage.getItem(LOCAL)||'[]');}catch{throw Error('Tarayıcı kaydı okunamıyor. Önizleme kaydını kontrol et.');}}
+function persistPreview(w){const list=readLocal();const i=list.findIndex(x=>x.id===w.id);if(i<0)list.unshift(w);else list[i]=w;localStorage.setItem(LOCAL,JSON.stringify(list));}
+function previewNext(state){const st=clone(state),i=st.cursor,a=st.answers;if(i===st.unlocked){if(i===0&&!filled(a.meta))throw Error('Belge öncesi değerlendirmeni yaz.');if([2,4,7,9].includes(i)&&!filled(a[fieldKey(i)]))throw Error('Bu aşamadaki bütün alanları doldur.');if([3,8].includes(i)&&!st.chats[currentGroup(i)].ready)throw Error('Sorgulama aşamasını tamamla.');if(i===10&&!filled(a.conclusion))throw Error('Nihai tarihsel sonucunu yaz.');st.unlocked=Math.min(11,i+1);}st.cursor=Math.min(11,i+1);return st;}
+const API={
+ async login(code){if(CFG.preview){if(code!=='DEMO-30')throw Error('Bu önizlemeye DEMO-30 koduyla girilir. Gerçek katılım kodu doğrulaması henüz bağlı değil.');works=readLocal();return;}const r=await request('/session','POST',{code});token=r.token;activity=r.activity;works=r.works;},
+ async create(){if(CFG.preview){const w={id:crypto.randomUUID(),created_at:new Date().toISOString(),revision:0,state:initialState()};persistPreview(w);return w;}return request('/works','POST',{});},
+ async get(id){if(CFG.preview)return readLocal().find(w=>w.id===id);return request('/works/'+id);},
+ async save(w,step,values){if(CFG.preview){const r=clone(w);r.revision++;persistPreview(r);return r;}return request('/works/'+w.id,'PATCH',{revision:w.revision,step,values});},
+ async move(direction){if(CFG.preview){const w=clone(work);if(direction==='next')w.state=previewNext(w.state);else w.state.cursor=Number(direction);w.revision++;persistPreview(w);return w;}return request('/works/'+work.id+'/move','POST',{revision:work.revision,target:direction});},
+ async chat(){const group=currentGroup();if(CFG.preview){const w=clone(work),chat=w.state.chats[group],key=group+'Draft';if(chat.messages.length){const value=w.state.answers[key].trim();if(!value)throw Error('Önce soruyu yanıtla.');chat.messages.push({role:'student',text:value});w.state.answers[key]='';chat.messages.push({role:'assistant',text:'Önizleme turu tamamlandı. Gerçek uygulamada bu noktada Gemini, gerekçelerine göre takip sorusu sorar veya son değerlendirmeye geçişi açar.'});chat.ready=true;}else chat.messages.push({role:'assistant',text:group==='single'?'Yorumunda dayandığın bir kanıtı seç. Kaynağın kim tarafından ve hangi amaçla oluşturulduğu, bu kanıtı kullanmanı nasıl etkiliyor?':'İki kaynağın farklılaştığı bir noktayı seç. Bu farkı, kaynakların oluşturulma koşullarıyla nasıl açıklayabilirsin?'});w.revision++;persistPreview(w);return w;}return request('/works/'+work.id+'/chat','POST',{revision:work.revision});}
+};
+async function flush(){clearTimeout(saveTimer);const step=work?.state.cursor,key=work?fieldKey(step):null;if(!dirty||!key)return saveQueue;const values=clone(work.state.answers[key]),w=work;dirty=false;saveQueue=saveQueue.catch(()=>{}).then(async()=>{message('Kaydediliyor…');try{const saved=await API.save(w,step,values);w.revision=saved.revision;message(CFG.preview?'Önizleme bu tarayıcıya kaydedildi.':'Otomatik kaydedildi.');}catch(e){dirty=true;throw e;}});return saveQueue;}
+function schedule(){dirty=true;message('Kaydediliyor…');clearTimeout(saveTimer);saveTimer=setTimeout(()=>flush().catch(fail),600);}
+async function perform(fn){if(busy)return;lastError='';busy=true;$('#screen').inert=true;document.querySelectorAll('#screen button,#steps button').forEach(b=>b.disabled=true);try{await flush();await fn();}catch(e){fail(e);}finally{busy=false;$('#screen').inert=false;render();}}
+function shell(){const active=page==='work';$('.app').classList.toggle('working',active);$('#research').hidden=!active;$('#researchText').textContent=activity?.question||'';$('#previewNote').textContent=CFG.preview?'Önizleme · örnek kaynaklar / YZ bağlı değil':activity?.preview?'Bağlantı denemesi · örnek kaynaklar':'';if(active){const i=work.state.cursor;const items=i<6?singleSteps:i<11?multiSteps:['Çalışma Raporu'];const base=i<6?0:i<11?6:11;$('#sectionTitle').textContent=i<6?'1. BÖLÜM · TEK KAYNAK':i<11?'2. BÖLÜM · ÇOKLU KAYNAK':'ETKİNLİK TAMAMLANDI';$('#steps').innerHTML=items.map((t,n)=>`<button class="step ${base+n===i?'active':''}" ${base+n>work.state.unlocked?'disabled':''} ${base+n===i?'aria-current="step"':''} data-step="${base+n}"><span class="num">${String(n+1).padStart(2,'0')}</span><span>${t}</span>${base+n>work.state.unlocked?'<span class="lock" aria-label="Kilitli">○</span>':''}</button>`).join('');document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>perform(async()=>{work=await API.move(b.dataset.step);fieldIndex=0;render();}));}else{$('#sectionTitle').textContent='TARİHSEL KAYNAK DEĞERLENDİRME';$('#steps').innerHTML='';}}
+function render(){shell();if(page==='home')home();else if(page==='code')codeScreen();else if(page==='sessions')sessionScreen();else renderWork();if(lastError&&$('#error'))$('#error').textContent=lastError;}
+function home(){$('#screen').innerHTML=`<div class="home-watermarks" aria-hidden="true"><span>Tarihin izinde, kanıtın peşinde.</span><span>Tarihin izinde, kanıtın peşinde.</span></div><section class="welcome" aria-label="Tarihİz ana sayfası"><p class="lead">Tarihsel belgeleri incele, kanıtların güçlü ve sınırlı yönlerini değerlendir. Farklı kaynakları karşılaştırarak kendi tarihsel sonucunu oluştur.</p><button class="primary" id="start">Çalışmaya Başla <span>→</span></button></section>`;$('#start').onclick=()=>{page='code';render();};}
+function codeScreen(){$('#screen').innerHTML=`<section class="center-card"><div class="eyebrow">ETKİNLİĞE KATIL</div><h2>Katılım kodunu gir.</h2><p class="muted">Öğretmeninin verdiği kodla çalışmana başla. Hesap veya şifre gerekmez.</p><form id="codeForm"><label for="code">Katılım kodu</label><input id="code" class="code" autocomplete="off" maxlength="80" required placeholder="${CFG.preview?'DEMO-30':'Katılım kodun'}">${CFG.preview?'<p class="notice">Arayüzü denemek için <strong>DEMO-30</strong> yaz. Bu kod gerçek öğrenci kaydı oluşturmaz.</p>':''}<p id="error" class="error" role="alert"></p><button class="primary" type="submit">Devam Et →</button></form></section>`;$('#codeForm').onsubmit=async e=>{e.preventDefault();if(busy)return;busy=true;const b=$('#codeForm button');b.disabled=true;try{await API.login($('#code').value.trim());page='sessions';render();}catch(e){fail(e);b.disabled=false;}finally{busy=false;}};}
+function sessionScreen(){$('#screen').innerHTML=`<section class="center-card"><div class="eyebrow">KAYNAKLAR SENİ BEKLİYOR</div><h2>${works.length?'Çalışmana devam et.':'Çalışmaya hazırsın.'}</h2><p class="muted">Tek Kaynak Değerlendirme ve Çoklu Kaynak Karşılaştırma bölümlerini sırayla tamamlayacaksın.</p>${works.length?`<div class="sessions">${works.map((w,i)=>`<div class="session-row"><p>Çalışma ${works.length-i} · ${new Date(w.created_at).toLocaleDateString('tr-TR')} · ${w.state.unlocked===11?'Tamamlandı':'Devam ediyor'}</p><button data-resume="${esc(w.id)}">Kaldığım Yerden Devam Et</button></div>`).join('')}</div>`:''}<button class="primary" id="new">Yeni Çalışma Başlat</button><p class="muted" style="font-size:12px;margin-top:12px">Yeni çalışma başlatmak önceki çalışmalarını silmez.</p><p id="error" class="error" role="alert"></p></section>`;$('#new').onclick=()=>perform(async()=>{work=await API.create();page='work';fieldIndex=0;sourceIndex=0;mobile='source';});document.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>perform(async()=>{work=await API.get(b.dataset.resume);page='work';sourceIndex=0;fieldIndex=0;}));}
+function metadata(s){return `<dl class="metadata"><dt>Oluşturan</dt><dd>${esc(s.creator)}</dd><dt>Tarih</dt><dd>${esc(s.date)}</dd><dt>Yer</dt><dd>${esc(s.place)}</dd><dt>Amaç</dt><dd>${esc(s.purpose)}</dd><dt>Belge türü</dt><dd>${esc(s.type)}</dd><dt>Kaynak</dt><dd>${esc(s.reference)}</dd></dl>`;}
+function safeUrl(url){try{const u=new URL(url,location.href);return ['http:','https:','file:'].includes(u.protocol)?u.href:'';}catch{return '';}}
+function sourcePane(){const st=work.state.cursor,s=activity.sources[st<6?0:sourceIndex];return `<section class="pane source-pane">${st>=6?`<div class="source-tabs">${activity.sources.map((_,i)=>`<button data-source="${i}" aria-pressed="${sourceIndex===i}">Kaynak ${i+1}</button>`).join('')}</div>`:''}<div class="pane-header"><div class="eyebrow">${st<6?'TEK KAYNAK':'KAYNAK '+(sourceIndex+1)}</div><h2>${esc(s.title)}</h2></div><div class="pane-body">${st===0?metadata(s):`<details><summary>Kaynak Bilgileri</summary>${metadata(s)}${(st<6||sourceIndex===0)?`<p><strong>Belge öncesi değerlendirmen</strong></p><p>${esc(work.state.answers.meta)}</p>`:''}</details><div class="source-tools"><button id="toggleText">${showText?'Belgeyi Göster':'Metni Göster'}</button>${s.image&&safeUrl(s.image)?`<a href="${esc(safeUrl(s.image))}" target="_blank" rel="noopener">Belgeyi büyüt ↗</a>`:''}</div>${showText?`<div class="source-text">${esc(s.text)}</div><p class="muted" style="font-size:11px">${s.verified?'Öğretmen tarafından doğrulanmış metin. Okunamayan kısımlar tamamlanmamıştır.':'Örnek öğretim metni; doğrulanmış tarihsel aktarım değildir.'}</p>`:s.image&&safeUrl(s.image)?`<img class="source-image" src="${esc(safeUrl(s.image))}" alt="${esc(s.title)} — özgün belge görüntüsü">`:'<div class="placeholder"><strong>Özgün belge alanı</strong><p>Öğretmenin doğrulanmış belge görüntüsü<br>bu alanda gösterilecek.</p><span class="badge">Tarihsel belge henüz eklenmedi</span></div>'}`}${activity.preview?'<div class="notice">Bu kaynak yalnızca arayüz denemesi içindir; gerçek tarihsel kanıt değildir.</div>':''}</div></section>`;}
+function navButtons(){const i=work.state.cursor;return `<div class="pane-nav"><button id="back" ${i===0?'disabled':''}>← Geri</button><button id="next" class="primary">${i===5?'İkinci Bölüme Geç':i===10?'Etkinliği Tamamla':'Devam Et'} →</button></div>`;}
+function previousAnswers(group){const key=group+'First';return `<details><summary>İlk değerlendirmemi göster</summary>${(group==='single'?tableFields:compareFields).map(([k,l])=>`<p><strong>${l}</strong></p><div class="readonly">${esc(work.state.answers[key][k])}</div>`).join('')}</details>`;}
+function focusFields(){const step=work.state.cursor,key=fieldKey(step),fields=fieldsFor(step);fieldIndex=Math.min(fieldIndex,fields.length-1);const [name,label]=fields[fieldIndex];const isLocked=locked();return `${[4,9].includes(step)?previousAnswers(currentGroup()):''}<div class="field-pager"><button id="fieldBack" ${fieldIndex===0?'disabled':''} aria-label="Önceki alan">‹</button><span>${step<6?'KANIT DEĞERLENDİRME TABLOSU':'KARŞILAŞTIRMA SORULARI'} · ${fieldIndex+1} / ${fields.length}</span><button id="fieldNext" ${fieldIndex===fields.length-1?'disabled':''} aria-label="Sonraki alan">›</button></div><div class="focus-field"><label for="response">${label}</label>${name==='judgment'&&step===4?'<p class="field-help">Bu kaynak, araştırma sorusunu yanıtlamak için ne ölçüde güvenilir ve yeterli? Kararını kanıtlarla gerekçelendir.</p>':''}<textarea id="response" ${isLocked?'readonly':''} placeholder="Kanıta dayanan düşünceni kendi cümlelerinle yaz…">${esc(work.state.answers[key][name])}</textarea></div>${isLocked?'<p class="field-help">Bu değerlendirme kaydedildi ve korunuyor.</p>':'<p class="field-help">Alanlar arasında oklarla geçebilirsin. Yazdıkların otomatik kaydedilir.</p>'}`;}
+function chatBody(){const group=currentGroup(),chat=work.state.chats[group];return `${previousAnswers(group)}${CFG.preview?'<div class="notice">Bu ekran diyalog önizlemesidir. Canlı Gemini değerlendirmesi yapılmaz; örnek turun tamamlanması yeterlilik kararı değildir.</div>':''}<div class="chat">${chat.messages.map(m=>`<div class="bubble ${m.role==='student'?'student':''}"><small>${m.role==='student'?'SEN':'YAPAY ZEKÂ İLE SORGULAMA'}</small>${esc(m.text)}</div>`).join('')}</div>${chat.ready?'<div class="notice">Sorgulama tamamlandı. Son değerlendirmeni kendi ifadelerinle oluşturmak için devam edebilirsin.</div>':chat.messages.length?`<div class="chat-compose"><label for="chatReply">Yanıtın</label><textarea id="chatReply" placeholder="Soruyu kendi değerlendirmen ve kaynaklarla ilişkilendir…">${esc(work.state.answers[group+'Draft'])}</textarea><button id="chatSend" class="primary">Yanıtımı Gönder</button></div>`:'<p>İlk değerlendirmen üzerinden yönlendirici sorularla ilerleyeceksin.</p><button id="chatSend" class="primary">Sorgulamayı Başlat</button>'}`;}
+function earlyAnswerPane() {
+  const state = work.state;
+  const step = state.cursor;
+  const key = fieldKey(step);
+  const afterReading = step === 0 && state.unlocked > 0;
+  const label = step === 1 ? 'Belgeyi okurken aldığın notlar (isteğe bağlı)'
+    : afterReading ? 'İlk değerlendirmene eklemek istediğin not (isteğe bağlı)'
+    : 'Bu bilgiler, kaynağın kanıt değerini nasıl etkileyebilir?';
+  const context = afterReading
+    ? '<p><strong>Belgeyi açmadan önce yazdığın değerlendirme</strong></p><div class="readonly">'+esc(state.answers.meta)+'</div>'
+    : step === 0 ? '<p>Belgeyi açmadan önce kaynak künyesini incele.</p>'
+    : '<p>Belgeyi incele. “Metni Göster” ile okunabilir metni açabilirsin.</p>';
+  return context + '<label for="response">'+label+'</label><textarea id="response" rows="5" placeholder="Buraya yazabilirsin…">'+esc(state.answers[key] || '')+'</textarea>';
+}
+function evaluationPane(){const st=work.state.cursor;let body='';if(st===0)body=earlyAnswerPane();if(st===1)body=earlyAnswerPane();if(st===6)body='<h3>Üç kaynağı birlikte düşün.</h3><p>Kaynak sekmeleriyle belgeleri incele. Birbirini destekleyen ve farklılaşan noktaları düşün.</p>';if([2,4,7,9].includes(st))body=focusFields();if([3,8].includes(st))body=chatBody();if(st===10)body=`<label for="response">Gerekçeli nihai tarihsel sonucunu oluştur.</label><p class="field-help">İncelediğin kaynaklara, kullandığın kanıtlara ve devam eden belirsizliklere açıkça değin.</p><textarea id="response" ${locked()?'readonly':''}>${esc(work.state.answers.conclusion)}</textarea><details><summary>Son karşılaştırmamı göster</summary>${compareFields.map(([k,l])=>`<p><strong>${l}</strong></p><div class="readonly">${esc(work.state.answers.multiFinal[k])}</div>`).join('')}</details>`;return `<section class="pane evaluation-pane"><div class="pane-header"><div class="eyebrow">${st<6?'1. BÖLÜM · TEK KAYNAK DEĞERLENDİRME':'2. BÖLÜM · ÇOKLU KAYNAK KARŞILAŞTIRMA'}</div><h2>${st<6?singleSteps[st]:multiSteps[st-6]}</h2></div><div class="pane-body">${body}<p id="error" class="error" role="alert"></p></div>${navButtons()}</section>`;}
+function renderWork(){const st=work.state.cursor;if(st===5){renderComparison();return;}if(st===11){renderReport();return;}$('#screen').innerHTML=`<div class="mobile-tabs"><button data-mobile="source" aria-pressed="${mobile==='source'}">Kaynağı İncele</button><button data-mobile="evaluation" aria-pressed="${mobile==='evaluation'}">Değerlendirmem</button></div><div class="workspace" data-mobile="${mobile}">${sourcePane()}${evaluationPane()}</div>`;document.querySelectorAll('.mobile-tabs button[data-mobile]').forEach(button => {
+  button.onclick = () => {
+    mobile = button.dataset.mobile;
+    document.querySelector('.workspace').dataset.mobile = mobile;
+    document.querySelectorAll('.mobile-tabs button').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
+  };
+});bindSourceControls();const response=$('#response');if(response&&!locked())response.oninput=()=>{const key=fieldKey();if([2,4,7,9].includes(st))work.state.answers[key][fieldsFor(st)[fieldIndex][0]]=response.value;else work.state.answers[key]=response.value;schedule();};if($('#fieldNext')){$('#fieldNext').onclick=()=>{fieldIndex++;render();};$('#fieldBack').onclick=()=>{fieldIndex--;render();};}if($('#chatReply'))$('#chatReply').oninput=()=>{work.state.answers[currentGroup()+'Draft']=$('#chatReply').value;schedule();};if($('#chatSend'))$('#chatSend').onclick=()=>perform(async()=>{work=await API.chat();});attachEditor();bindNav();}
+function bindSourceControls() {
+  function updateSource() {
+    const pane = document.querySelector('.source-pane');
+    pane.outerHTML = sourcePane();
+    bindSourceControls();
+  }
+  document.querySelectorAll('.source-pane button[data-source]').forEach(button => {
+    button.onclick = () => {
+      sourceIndex = Number(button.dataset.source);
+      showText = false;
+      updateSource();
+    };
+  });
+  const toggle = $('#toggleText');
+  if (toggle) toggle.onclick = () => { showText = !showText; updateSource(); };
+}
+
+function attachEditor() {
+  const field = $('#response') || $('#chatReply');
+  if (!field || field.readOnly || field.disabled) return;
+  const open = document.createElement('button');
+  open.type = 'button';
+  open.className = 'open-editor';
+  open.textContent = 'Yanıtı ayrı alanda yaz';
+  field.after(open);
+  open.onclick = () => {
+    const dialog = $('#answerEditor');
+    const editor = $('#editorText');
+    $('#editorPrompt').textContent = field.labels?.[0]?.textContent || 'Yanıtın';
+    editor.value = field.value;
+    const start = field.selectionStart, end = field.selectionEnd;
+    editor.oninput = () => {
+      field.value = editor.value;
+      field.dispatchEvent(new Event('input', {bubbles:true}));
+    };
+    dialog.showModal();
+    editor.focus();
+    editor.setSelectionRange(start, end);
+  };
+}
+$('#editorDone').onclick = () => $('#answerEditor').close();
+$('#answerEditor').addEventListener('close', () => {
+  $('#editorText').oninput = null;
+  flush().catch(fail);
+});
+function bindNav(){$('#back').onclick=()=>perform(async()=>{work=await API.move(String(work.state.cursor-1));fieldIndex=0;});$('#next').onclick=()=>perform(async()=>{const st=work.state.cursor;if([2,4,7,9].includes(st)){const fields=fieldsFor(st),missing=fields.findIndex(([k])=>!work.state.answers[fieldKey()][k].trim());if(missing>=0){fieldIndex=missing;throw Error('Devam etmeden önce bütün değerlendirme alanlarını doldur.');}}work=await API.move('next');fieldIndex=0;if(work.state.cursor===6)mobile='source';else mobile='evaluation';sourceIndex=0;showText=false;});}
+function renderComparison(){$('#screen').innerHTML=`<section class="full-panel"><div class="pane-header"><div class="eyebrow">1. BÖLÜM TAMAMLANIYOR</div><h2>Değerlendirmende neler değişti?</h2></div><div class="pane-body">${tableFields.map(([k,l])=>`<section class="compare-row"><h3>${k==='judgment'?'Genel değerlendirme / Gerekçeli son karar':l}</h3><div class="comparison-grid"><div><span class="eyebrow">İLK DEĞERLENDİRMEM</span><div class="readonly">${esc(work.state.answers.singleFirst[k])}</div></div><div><span class="eyebrow">SON DEĞERLENDİRMEM</span><div class="readonly">${esc(work.state.answers.singleFinal[k])}</div></div></div></section>`).join('')}<p id="error" class="error" role="alert"></p></div>${navButtons()}</section>`;bindNav();}
+function reportHTML(){let html=`<h1>Tarihİz · Çalışma Raporu</h1><p>${esc(activity.question)}</p><p>Çalışma: ${esc(work.id)} · ${new Date(work.created_at).toLocaleDateString('tr-TR')}</p>${CFG.preview?'<p>ÖNİZLEME — Kurmaca öğretim metinleri ve örnek diyalog.</p>':''}<section class="report-section"><h2>Belge öncesi değerlendirme</h2><div class="readonly">${esc(work.state.answers.meta)}</div>${[['metaAddendum','Sonradan eklenen not'],['documentNote','Belge inceleme notları']].filter(([key])=>work.state.answers[key]).map(([key,label])=>`<h3>${label}</h3><div class="readonly">${esc(work.state.answers[key])}</div>`).join('')}</section>`;for(const group of ['single','multi']){const fields=group==='single'?tableFields:compareFields;html+=`<section class="report-section"><h2>${group==='single'?'Tek Kaynak Değerlendirme':'Çoklu Kaynak Karşılaştırma'}</h2>`;for(const phase of ['First','Final']){html+=`<h3>${phase==='First'?'İlk değerlendirme':'Son değerlendirme'}</h3>`;for(const [k,l]of fields)html+=`<p><strong>${l}</strong></p><div class="readonly">${esc(work.state.answers[group+phase][k])}</div>`;}html+='<h3>Yapay Zekâ ile Sorgulama</h3>'+work.state.chats[group].messages.map(m=>`<p><strong>${m.role==='student'?'Öğrenci':'Yapay zekâ'}:</strong></p><div class="readonly">${esc(m.text)}</div>`).join('')+'</section>';}html+=`<section class="report-section"><h2>Nihai tarihsel sonuç</h2><div class="readonly">${esc(work.state.answers.conclusion)}</div></section><section class="report-section"><h2>İncelenen kaynaklar</h2>${activity.sources.map(s=>`<h3>${esc(s.title)}</h3>${metadata(s)}`).join('')}</section>`;return html;}
+function renderReport(){$('#screen').innerHTML=`<section class="full-panel"><div class="pane-header no-print"><div class="eyebrow">ETKİNLİK TAMAMLANDI</div><h2>Öğrenme sürecinin özeti</h2></div><div class="pane-body"><div class="report-body">${reportHTML()}</div><p id="error" class="error" role="alert"></p></div><div class="pane-nav no-print"><button id="backReport">← Nihai sonuca dön</button><button class="primary" id="pdf">PDF Raporunu İndir ↓</button></div></section>`;$('#backReport').onclick=()=>perform(async()=>{work=await API.move('10');});$('#pdf').onclick=async()=>{try{await flush();if(!CFG.preview) {
+  work=await API.get(work.id);
+  if(work.state.unlocked<11) throw Error('Önce etkinliği tamamla.');
+}
+await exportPreviewPDF();}catch(e){fail(e);}};}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+async function exportPreviewPDF(){if(!window.jspdf){message('Önizlemede PDF için yazdırma penceresinden “PDF olarak kaydet” seç.',false);window.print();return;}const doc=new window.jspdf.jsPDF();doc.addFileToVFS('TarihIz.ttf',window.TARIHIZ_FONT);doc.addFont('TarihIz.ttf','TarihIz','normal');doc.setFont('TarihIz');doc.setFontSize(11);let y=18;const temp=document.createElement('div');temp.innerHTML=reportHTML();for(const el of temp.querySelectorAll('h1,h2,h3,p,.readonly,dt,dd')){const text=el.textContent.trim();if(!text)continue;const lines=doc.splitTextToSize(text,176);for(const line of lines){if(y>278){doc.addPage();y=18;}doc.text(line,17,y);y+=5.5;}y+=3;}doc.save('TarihIz_Onizleme_Raporu.pdf');}
+// Beş mevcut banner; sekme gizliyken durur, azaltılmış hareket tercihinde otomatik oynatılmaz.
+const bannerFiles=['banner-01-genel.png','banner-02-orta-asya.png','banner-03-selcuklu.png','banner-04-osmanli.png','banner-05-cumhuriyet.png'];
+const bannerNames=['Tarihsel dönemler','Orta Asya','Selçuklu','Osmanlı','Cumhuriyet'];let slide=1,paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
+$('#slides').innerHTML=bannerFiles.map((f,i)=>`<div class="slide ${i===slide?'active':''}" aria-hidden="${i!==slide}"><img src="../assets/${f}" alt="${bannerNames[i]}" ${i?'loading="eager"':''}></div>`).join('');
+$('#slideLabel').textContent=(slide+1)+' / 5';
+function bannerState(){$('#pauseBanner').textContent=paused?'▶':'Ⅱ';$('#pauseBanner').setAttribute('aria-label',paused?'Banner geçişini başlat':'Banner geçişini duraklat');}
+$('#pauseBanner').onclick=()=>{paused=!paused;bannerState();};bannerState();setInterval(()=>{if(paused||document.hidden)return;const slides=document.querySelectorAll('.slide');slides[slide].classList.remove('active');slides[slide].setAttribute('aria-hidden','true');slide=(slide+1)%5;slides[slide].classList.add('active');slides[slide].setAttribute('aria-hidden','false');$('#slideLabel').textContent=(slide+1)+' / 5';},8000);
+$('#about').onclick=()=>$('#aboutDialog').showModal();$('#closeAbout').onclick=()=>$('#aboutDialog').close();
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+render();
