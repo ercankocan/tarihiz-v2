@@ -30,3 +30,9 @@
 @keyframes spin {to {transform:rotate(360deg);}}
 @media (prefers-reduced-motion: reduce){.thinking::before{animation:none;}}
 @media(max-width:760px){.screen:has(.topic-work){overflow:auto;display:block;}.topic-work{display:grid;grid-template-columns:1fr;}.topic-work .pane-body{overflow:visible;}.topic-work .pane{overflow:visible;}}
+
+.ai-pending {display:none;align-items:center;gap:.7rem;padding:.65rem 1rem;color:var(--navy);background:#f5eddb;}
+#screen[data-thinking] .ai-pending {display:flex;}
+.ai-pending span {display:inline-block;color:#87641a;font-size:1.6rem;animation:spin 1.4s linear infinite;}
+.turn-feedback {border-inline-start:2px solid var(--gold);padding-inline-start:.65rem;}
+@media(prefers-reduced-motion:reduce){.ai-pending span{animation:none;}}

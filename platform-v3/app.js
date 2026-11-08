@@ -33,7 +33,7 @@ async function run(fn, thinking=false) {
   if (busy) return;
   busy = true;
   const status = $('#status');
-  status.classList.toggle('thinking',thinking);
+  if (thinking) $('#screen').setAttribute('data-thinking','true');
   status.textContent = thinking ? 'Yanıtınız hazırlanıyor…' : 'Yükleniyor…';
   $('#screen').setAttribute('aria-busy','true');
   $('#screen').querySelectorAll('textarea').forEach(field => field.readOnly=true);
@@ -45,7 +45,7 @@ async function run(fn, thinking=false) {
   } catch (error) {
     status.textContent=error.message;
   } finally {
-    status.classList.remove('thinking');
+    $('#screen').removeAttribute('data-thinking');
     $('#screen').removeAttribute('aria-busy');
     $('#screen').querySelectorAll('textarea').forEach(field => field.readOnly=false);
     busy=false;
@@ -96,7 +96,7 @@ function sourceHTML(source) {
   return `<article><h3>${esc(source.title)}</h3>${image}<p class="source-text">${esc(source.text)}</p><details><summary>Kaynak künyesi</summary><dl class="metadata">${fields.filter(([key])=>source[key]).map(([key,label])=>`<dt>${label}</dt><dd>${esc(source[key])}</dd>`).join('')}</dl></details></article>`;
 }
 function transcript() {
-  return work.state.messages.map(m=>`<div class="bubble ${m.role==='student'?'student':''}"><small>${m.role==='student'?'Sen':'Tarihİz'}</small><p>${esc(m.text)}</p></div>`).join('');
+  return work.state.messages.map(m=>`<div class="bubble ${m.role==='student'?'student':''}"><small>${m.role==='student'?'Sen':'Tarihİz'}</small>${m.feedback ? `<p class="turn-feedback">${esc(m.feedback)}</p>` : ''}<p>${esc(m.text)}</p></div>`).join('');
 }
 function button(action,label) {
   return `<button class="primary" data-action="${action}">${label}</button>`;
@@ -118,7 +118,7 @@ function activityBody() {
   if(s.stage==='initial' || s.stage==='final') return editor(work.activity_snapshot.question)+button(s.stage,s.stage==='initial'?'İlk Yanıtımı Gönder':'Çalışmayı Tamamla');
   if(s.stage==='done') return `<h3>İlk değerlendirmem</h3><p>${esc(s.initial.text)}</p><details><summary>Sorgulama konuşması</summary>${transcript()}</details><h3>Son değerlendirmem</h3><p>${esc(s.final.text)}</p><p>Araştırmamıza destek olduğunuz için teşekkür ederiz.</p>${feedbackLink()}`;
   const waiting=s.messages.at(-1)?.role==='assistant';
-  return transcript()+(waiting?editor('Soruya yanıtın')+button('reply','Yanıtımı Gönder'):button('ask',s.messages.length?'Bir Soru Daha Sor':'Sorgulamaya Başla'))+
+  return transcript()+(waiting?editor('Soruya yanıtın')+button('reply','Yanıtımı Gönder'):button('ask',s.messages.length?'Yanıtıma Geri Bildirim Al':'Sorgulamaya Başla'))+
     (s.suggestFinish?'<p>Son değerlendirmene geçebilirsin.</p>':'')+
     (s.messages.some(m=>m.role==='student')?button('finishChat','Sorgulamayı Bitir'):'');
 }
@@ -130,7 +130,7 @@ function draw() {
   frame(true);
   const a=work.activity_snapshot;
   $('#screen').innerHTML=`<div class="topic-work"><section class="pane source-pane"><div class="pane-header"><h2>${esc(a.title)}</h2></div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${a.sources.map(sourceHTML).join('')}</div></section>
-  <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${activityBody()}</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
+  <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${activityBody()}</div><div class="ai-pending" role="status"><span aria-hidden="true">✦</span> Yanıtınız hazırlanıyor…</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
   if(sameChat) {
     $('#activityBody').scrollTop=top;
     $('#screen').scrollTop=screenTop;
@@ -155,7 +155,11 @@ function draw() {
     if(['reply','initial','final'].includes(action)) body.text=field.value;
     work=await request('/works/'+work.id,body);
     draw();
-  },b.dataset.action==='ask'));
+    if (action==='reply') {
+      work=await request('/works/'+work.id,{action:'ask',revision:work.revision});
+      draw();
+    }
+  },['reply','ask'].includes(b.dataset.action)));
 }
 const bannerFiles=['banner-01-genel.png','banner-02-orta-asya.png','banner-03-selcuklu.png','banner-04-osmanli.png','banner-05-cumhuriyet.png'];
 const bannerNames=['Tarihsel dönemler','Orta Asya','Selçuklu','Osmanlı','Cumhuriyet'];let slide=1,paused=matchMedia('(prefers-reduced-motion: reduce)').matches;

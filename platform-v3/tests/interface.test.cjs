@@ -22,9 +22,10 @@ test('Konu seçimi, kaynak, bekleme göstergesi ve sohbet konumunun korunması',
       const input=JSON.parse(opts.body);
       if(url.endsWith('/session')) return Response.json({token:'t',topics:[{title:'Esnaf',id:'B',stage:'chat'}]});
       if(url.endsWith('/works')) {assert.equal(input.topic_id,'B');return Response.json(work);}
+      if(input.action==='reply') {work.state.messages.push({role:'student',text:input.text});return Response.json(work);}
       assert.equal(input.action,'ask');
       await new Promise(resolve=>release=resolve);
-      return Response.json({...work,state:{stage:'chat',messages:[{role:'assistant',text:'Hangi kanıt?'}]}});
+      work.state.messages.push({role:'assistant',feedback:'Bir fark belirttin.',text:'Hangi kanıt?'});return Response.json(work);
     }};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),context);
   element('#start').onclick();element('#code').value='test-code';
@@ -39,5 +40,11 @@ test('Konu seçimi, kaynak, bekleme göstergesi ve sohbet konumunun korunması',
   assert.equal(element('#status').textContent,'Yanıtınız hazırlanıyor…');
   release();await pending;
   assert.match(element('#screen').innerHTML,/Hangi kanıt/);
+  askButton.dataset.action='reply';element('#response').value='Fark var.';
+  const follow=askButton.onclick();await new Promise(setImmediate);
+  assert.equal(element('#status').textContent,'Yanıtınız hazırlanıyor…');
+  release();await follow;
+  assert.deepEqual(work.state.messages.map(m=>m.role),['assistant','student','assistant']);
+  assert.match(element('#screen').innerHTML,/Bir fark belirttin/);
   assert.equal(element('#activityBody').scrollTop,120);assert.equal(element('#screen').scrollTop,75);
 });

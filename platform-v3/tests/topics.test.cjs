@@ -21,7 +21,7 @@ function sandbox() {
     const body=opts.body && JSON.parse(opts.body);
     if(url.hostname==='generativelanguage.googleapis.com') {
       prompts.push(JSON.parse(body.contents[0].parts[0].text));
-      return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({question:'Hangi ayrıntıyı kanıt gösterirsin?',ready:true})}]}}]});
+      return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({feedback:'Yorumunu henüz belirli bir ayrıntıya bağlamadın.',question:'Hangi ayrıntıyı kanıt gösterirsin?',ready:true})}]}}]});
     }
     assert.equal(url.hostname,'db.invalid');
     if(url.pathname.endsWith('tarihiz_rate_allow')) return Response.json(true);
@@ -89,6 +89,7 @@ test('Anonim öğrenci ve konu akışı',async t=>{
     await act('finishChat',null,422);w=await act('ask');await act('finishChat',null,422);
     assert.deepEqual(prompts[0].activity,w.activity_snapshot);
     assert.equal(prompts[0].initial.text,'İlk yorum');
+    assert.ok(w.state.messages[0].feedback);
     w=await act('reply','?');
     assert.deepEqual(w.state.messages.map(m=>m.role),['assistant','student']);
     assert.ok(w.state.messages.every(m=>Date.parse(m.at)));
