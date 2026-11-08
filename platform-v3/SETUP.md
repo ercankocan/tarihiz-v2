@@ -1,24 +1,19 @@
-# Tarihİz inceleme sürümü
+# Tarihİz · Konu Başlıkları
 
-Tek dosyalı HTML önizlemesini indirip tarayıcıda açın. “Çalışmaya Başla” düğmesinden sonra `DEMO-30` kodunu girin. Örnek çalışmalar yalnızca aynı tarayıcıda saklanır. Yeni çalışma başlatınca önceki çalışma korunur. Örnek diyaloglar Gemini bağlantısı kullanmaz. PDF raporu son adımda indirilebilir.
+Öğrenci aynı katılım koduyla giriş yapar, konu başlığını seçer ve kaynağı inceler. İlk yanıt gönderildikten sonra kilitlenir. Gemini soruları ve öğrenci yanıtları ayrı zaman damgalarıyla tutulur. Bir soruyu yanıtladıktan sonra öğrenci son değerlendirmeye geçebilir. Tamamlanmış bir konu yalnızca okunabilir. Yazı alanları kısa bir duraklamadan sonra taslak olarak kaydedilir.
 
-## Kaynak paketi
+## Ayrı test ortamında kurulum
 
-`platform-v3/` yeni uygulamadır. ZIP içindeki `assets/` dosyaları depodaki mevcut logo ve beş bannerın aynı kopyalarıdır. Depo için önerilen ekleme yalnızca `platform-v3/` klasörüdür. Önizleme için ZIP'i açın, kökten `python -m http.server 8000` çalıştırın ve `http://localhost:8000/platform-v3/` adresini açın.
+1. Boş bir test Supabase projesinde SQL Editor ile `supabase/schema.sql` çalıştırın. Önceki şemayı içeren bir test projesinde **yalnız** `supabase/migrations/001_topics.sql` kullanın. Yeni tablolar `tarihiz_topics` ve `tarihiz_topic_works`. Eski çalışmalar kendi tablosunda kalır.
+2. Test ortamında istenirse `supabase/demo.sql` ile iki açıkça etiketlenmiş kurmaca konu ekleyin. Gerçek içerikler için Table Editor’da `tarihiz_topics` içine başlık, ana soru, `sources` JSON dizisi ve `demo` değeri girin. Kimlik otomatik üretilir. Her kaynakta benzersiz bir `id`, başlık, kısa künye, HTTPS görsel adresi veya kısa belge metni bulunur. Yalnız görsel kullanıldığında öğretmenin doğruladığı bir `description` girin. Gemini görsel içeriğini bu açıklamadan alır. Doğrulanmış aktarım `text` alanına yazılır. Var olan çalışmalar, oluşturuldukları andaki soru ve kaynakları kullanır. Aynı öğrenciye yeni etkinlik atamak için yeni konu satırı ekleyin.
+3. Test projesinin Edge Secrets alanında `GEMINI_API_KEY`, `GEMINI_MODEL`, `CODE_PEPPER` ve arayüzün origin değerini içeren `ALLOWED_ORIGINS` ayarlayın. Oturum ve kod doğrulama için mevcut pepper korunmalıdır. Test öğrencileri için `api/provision_codes.py` betiği kullanılabilir. Veritabanı erişimi yalnızca Edge Function'ın service role anahtarıyla yapılır.
+4. Test projesinde `supabase/functions/tarihiz-api/index.ts` dosyasını `tarihiz-api` olarak kurun. Bu işlev kendi anonim oturumunu doğruladığı için **yalnız bu işlevde** ağ geçidinin legacy JWT doğrulamasını kapatın. `config.js` içindeki `apiBase` değerini test işlevinin tam HTTPS adresine ayarlayın. Yerel varsayılan yerel Supabase'e yönelir. Depo kökünden statik sunucu çalıştırıp `/platform-v3/` sayfasını açın. Bu dal dağıtım yapmaz.
+5. Pilot öncesinde gerçek belgeleri ve künyelerini, katılım kodlarını, model erişimini ve mobil görünümü test projesinde deneyin. İki kod ve iki konu ile kayıt yalıtımını, sohbeti, yenileme sonrası devam etmeyi ve tamamlanan yanıtlardaki kilidi kontrol edin.
 
-## Canlı bağlantıları etkinleştirme
+## Araştırma kayıtları
 
-1. Öğretmenin belirlediği tek araştırma sorusu için `activity-template.json` dosyasını doldurun. Üç kaynağın özgün belge görüntüsü, tam künyesi ve doğrulanmış metni gerekir. Okunamayan yerleri aktarımda açıkça işaretleyin. `verified` alanını ancak metin doğrulandıktan sonra `true` yapın. Onaylı her etkinlik sürümü farklı bir `id` kullanır. Sunucu etkinlik içeriğini her çalışmayla birlikte saklar.
-2. Supabase SQL Editor'da `supabase/schema.sql` dosyasını bir kez çalıştırın. Öğretmen verileri `tarihiz_works` tablosunda `participant_id` ile `tarihiz_participants` kayıtlarını eşleştirerek inceleyebilir. `state.answers` ilk ve son yanıtları, `state.chats` diyalogları, `state.cursor` ve `state.unlocked` ilerlemeyi tutar.
-3. `api/.env.example` alanlarını API sunucusunun ortam değişkenlerinde tanımlayın. `CODE_PEPPER` için örneğin `python -c "import secrets; print(secrets.token_urlsafe(48))"` ile benzersiz bir değer oluşturun ve saklayın. `GEMINI_MODEL` alanında kendi hesabınızın yapılandırılmış JSON yanıtını destekleyen modelini seçin. `ACTIVITY_FILE` doldurduğunuz JSON dosyasının mutlak yoludur. `ALLOWED_ORIGINS` yayımlanacak Pages adresinin origin değeridir. Sunucu anahtarları yalnız API ortamındadır.
-4. `platform-v3/` içinden `python api/provision_codes.py --count 8 --out private` ile öğretmen için kodları üretin. `private/supabase_katilimcilar.csv` dosyasını Supabase'deki `tarihiz_participants` tablosuna aktarın. `private/ogretmen_kodlari.csv` öğretmene ait ham kod listesidir. Üretici ve sunucu aynı `CODE_PEPPER` değerini kullanır.
-5. Ayrı bir Python ortamında `python -m pip install -r api/requirements.txt` çalıştırın. `platform-v3/` içinden `python -m uvicorn api.app:app --host 0.0.0.0 --port 8000` ile API'yi başlatın. Yayında HTTPS ve güvenilen ters vekil ayarlarını kullanın. `/health` sunucunun başladığını bildirir. Bağlantıları gerçek bir deneme koduyla ayrıca sınayın.
-6. Ön yüzde `config.js` içindeki `preview` değerini `false`, `apiBase` değerini HTTPS API adresi olarak ayarlayın. GitHub Pages statik yayınına HTML, CSS, ön yüz JS dosyaları, kullanılan vendor dosyaları ve mevcut `assets/` yeterlidir. Kimlik bilgilerini veya öğrenci çalışmalarını Pages'e koymayın.
+`participant_id` öğrencinin tüm konularını birleştirir. `topic_id` aynı konuya ikinci çalışma açılmasını engelleyen bileşik anahtarın diğer parçasıdır. `activity_snapshot` özgün başlık, soru, kaynak kimlikleri ve kullanılan içerikleri saklar. `state` içinde aşama, taslak, zamanlı ilk ve son yanıtlar, sıralı konuşma ve bitirme zamanı bulunur. `created_at` ve `updated_at` çalışma kaydına aittir.
 
-## Öğrenci akışı
+## Test
 
-Ana sayfa, katılım kodu, çalışma seçimi, tek kaynak bölümünün altı aşaması, çoklu kaynak bölümünün beş aşaması ve rapor. Künye değerlendirmesi kaydedilmeden belge açılmaz. Her bölümün ilk yanıtı gönderildikten sonra korunur. Çoklu kaynak alanında üç belge arasında geçiş yapılır. Gerçek sorgulamada Gemini bir sonraki soruyu önceki yanıta göre üretir. Sabit tur sayısı uygulanmaz. Etkinlik raporunda ilk ve son değerlendirmeler, diyaloglar, kaynak künyeleri ve nihai sonuç yer alır.
-
-## Kontrol
-
-`platform-v3/` içinden `PYTHONPATH=. python -m unittest discover -s tests -v` ile sunucu kural testlerini çalıştırabilirsiniz. Canlı Supabase ve Gemini bağlantıları öğretmenin hizmetleri ve kaynaklarıyla kurulmalıdır. Önizlemede kullanılan kurmaca metinler sınıf uygulaması için hazırlanmış tarihsel belgeler değildir.
+`platform-v3/` içinde `node --test tests/*.test.cjs` çalıştırın (Node 20+). HTTP testleri gerçek Edge giriş noktasını çağırır. Veritabanı ve Gemini ağ sınırları bellek içi benzetimlerdir. Python dosyaları ve önceki testleri eski API için korunur.

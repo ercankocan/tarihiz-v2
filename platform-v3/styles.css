@@ -18,3 +18,15 @@
 .open-editor { margin-top: 8px; padding: 5px 10px; font-size: 12px; }
 #answerEditor textarea { display: block; min-height: 145px; max-height: 45dvh; margin: 8px 0 14px; }
 #answerEditor { max-height: 90dvh; overflow: auto; }
+.topic-list { display:grid;align-content:start;gap:12px; }
+.topic-list button {display:flex;justify-content:space-between;align-items:center;text-align:start;padding:18px;gap:12px;}
+.topic-work {display:grid;grid-template-columns:1fr 1fr;gap:18px;flex:1;min-height:0;}
+.topic-work .pane {min-width:0;}
+#activityBody {overflow-anchor:none;}
+#activityBody textarea {display:block;width:100%;margin:12px 0;}
+#activityBody button {margin:6px 8px 6px 0;}
+#activityBody p,.source-text {white-space:pre-wrap;overflow-wrap:anywhere;}
+.thinking::before {content:'✧';display:inline-block;margin-right:6px;animation:spin 1.2s linear infinite;}
+@keyframes spin {to {transform:rotate(360deg);}}
+@media (prefers-reduced-motion: reduce){.thinking::before{animation:none;}}
+@media(max-width:760px){.screen:has(.topic-work){overflow:auto;display:block;}.topic-work{display:grid;grid-template-columns:1fr;}.topic-work .pane-body{overflow:visible;}.topic-work .pane{overflow:visible;}}

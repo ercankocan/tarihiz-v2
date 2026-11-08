@@ -1,8 +1,7 @@
 {
-  "id": "etkinlik-01-v1",
   "title": "",
-  "preview": false,
   "question": "",
+  "demo": false,
   "sources": [
     {
       "id": "k1",
@@ -14,33 +13,7 @@
       "type": "",
       "reference": "",
       "image": "",
-      "verified": false,
-      "text": ""
-    },
-    {
-      "id": "k2",
-      "title": "",
-      "creator": "",
-      "date": "",
-      "place": "",
-      "purpose": "",
-      "type": "",
-      "reference": "",
-      "image": "",
-      "verified": false,
-      "text": ""
-    },
-    {
-      "id": "k3",
-      "title": "",
-      "creator": "",
-      "date": "",
-      "place": "",
-      "purpose": "",
-      "type": "",
-      "reference": "",
-      "image": "",
-      "verified": false,
+      "description": "",
       "text": ""
     }
   ]
