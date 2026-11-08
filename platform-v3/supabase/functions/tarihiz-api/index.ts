@@ -169,8 +169,8 @@ Deno.serve(async request => {
   if (request.method==='OPTIONS') return new Response(null,{status:204,headers});
   try {
     const pathname=new URL(request.url).pathname;
-    const index=pathname.indexOf('/tarihiz-api');
-    const path=index<0?pathname:pathname.slice(index+'/tarihiz-api'.length)||'/';
+    // Supabase prefixes the route with the deployed function slug (independent of its display name).
+    const path=pathname.replace(/^\/(?:functions\/v1\/)?[^/]+(?=\/|$)/, '') || '/';
     return new Response(JSON.stringify(await route(request,path)),{headers});
   } catch (error) {
     return new Response(JSON.stringify({detail:error instanceof HttpError?error.message:'İşlem tamamlanamadı. Yanıtın kayıtlıysa yeniden dene.'}), {status:error instanceof HttpError?error.status:503,headers});
