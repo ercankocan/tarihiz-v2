@@ -1,0 +1,66 @@
+{
+  "durum": "TASLAK — yayımlanmadı, canlı veritabanına aktarılmadı",
+  "aciklama": "İki pilot konusu için platform-v3/activity-template.json ile uyumlu konu veri taslağıdır. Görsel barındırma ve yeniden kullanım koşulları incelenmeden canlı siteye aktarılmamalıdır. Kaynakların tarihî yorumlarını öğrenciye hazır vermemek için metin yalnızca künye ve okuma yardımını içerir.",
+  "konular": [
+    {
+      "title": "Altın Elbiseli Adam",
+      "question": "Altın Elbiseli Adam’a ait buluntular, bu kişinin yaşadığı toplum hakkında hangi çıkarımları yapmamızı sağlar? Görüşünü görsellerdeki ayrıntılara dayanarak açıkla.",
+      "demo": false,
+      "sources": [
+        {
+          "id": "altin-rekonstruksiyon",
+          "title": "Altın Elbiseli Adam — buluntulara dayalı rekonstrüksiyon",
+          "creator": "K. Altynbekov (rekonstrüksiyon); O. V. Belyalov (fotoğraf)",
+          "date": "Modern rekonstrüksiyon; özgün buluntular Saka dönemi",
+          "place": "Esik Kurganı, Kazakistan",
+          "purpose": "Arkeolojik buluntuların kıyafet üzerindeki olası düzenini görselleştirme",
+          "type": "Arkeolojik buluntulara dayalı bilimsel rekonstrüksiyon görseli",
+          "reference": "Archaeology.kz, «Issyk, the barrow», fotoğraf galerisi, rekonstrüksiyon. https://archaeology.kz/en/heritages/54-esik-obasy",
+          "image": "https://archaeology.kz/static/heritages/a684eceee76fc522773286a895bc8436/217d0dff6a9dadd86e93345c5b13b2f3.jpg",
+          "description": "Esik Kurganı'ndaki arkeolojik buluntulardan yararlanılarak oluşturulmuş kıyafet rekonstrüksiyonu. Kırmızı giysi üzerinde altın renkli süslemeler, uzun sivri başlık, kemer ve silahlar görülür. Özgün buluntunun antik çağda çekilmiş fotoğrafı değildir.",
+          "text": "Bu görsel, Esik Kurganı'nda bulunan eserlerden hareketle hazırlanmış bir rekonstrüksiyondur. Giysinin bütünü arkeologların yorumuyla yeniden oluşturulmuştur."
+        },
+        {
+          "id": "altin-susleme",
+          "title": "Esik Kurganı'ndan özgün altın süsleme parçaları",
+          "creator": "O. V. Belyalov (eser fotoğrafı); tarihî üretici bilinmiyor",
+          "date": "Saka dönemi (Demir Çağı)",
+          "place": "Esik Kurganı, Kazakistan",
+          "purpose": "Kıyafete dikilen altın süsleme parçaları",
+          "type": "Özgün arkeolojik buluntu fotoğrafı",
+          "reference": "Archaeology.kz, «Issyk, the barrow», fotoğraf galerisi, kedigil başı biçimindeki dikili süslemeler. https://archaeology.kz/en/heritages/54-esik-obasy",
+          "image": "https://archaeology.kz/static/heritages/a684eceee76fc522773286a895bc8436/5f4e7e926614f21c3664dbabce91daf8.jpg",
+          "description": "Esik Kurganı'ndan çıkarılmış, üzerlerinde kedigil başı biçimli kabartmalar bulunan iki altın giysi süsleme parçasının arkeolojik fotoğrafı.",
+          "text": "Bu fotoğrafta, Esik Kurganı'ndan çıkarılmış gerçek altın süsleme parçaları görülmektedir. Fotoğraf bir rekonstrüksiyon değil, buluntuların kendisini göstermektedir."
+        }
+      ]
+    },
+    {
+      "title": "1914’te Trabzon Vilayeti’nde Eğitim",
+      "question": "1914 tarihli bu haritadan hareketle Trabzon Vilayeti'ndeki çocukların eğitim olanakları hakkında hangi çıkarımlarda bulunabiliriz? Görüşünü haritadaki işaretlere dayanarak açıkla.",
+      "demo": false,
+      "sources": [
+        {
+          "id": "salt-epl013",
+          "title": "Trabzon Vilayeti okullarını gösteren harita, No. 13",
+          "creator": "Matbaa-i Âmire (yayıncı)",
+          "date": "Eylül 1330 / Eylül 1914",
+          "place": "Trabzon Vilayeti, Osmanlı Devleti",
+          "purpose": "Vilayetteki mekteplerin türlerini, yerlerini ve belirli özelliklerini gösterme",
+          "type": "Özgün basılı tarihsel harita (dijital tarama)",
+          "reference": "SALT Araştırma, EPL013. https://archives.saltresearch.org/handle/123456789/99196",
+          "image": "https://archives.saltresearch.org/bitstream/123456789/99196/1/EPL013.jpg",
+          "description": "Eylül 1914 tarihli özgün Trabzon Vilayeti okul haritası. Haritadaki kırmızı daireler II. Meşrutiyet öncesi, siyah daireler sonrasında Eylül 1914'e kadar açılmış mektepleri gösterir. Çift çizgili işaretler kız mektepleridir; dairelerin bölmeleri dershane sayısını, üzerindeki rakamlar ilgili türdeki okul sayısını gösterir; üçgenler numune mektepleridir. Haritanın özgün Osmanlıca alt notlarında bazı okulların ve bazı kazaların kayıt eksikleri sebebiyle gösterilemediği de belirtilir.",
+          "text": "Haritayı okuma rehberi (özgün Osmanlıca açıklamanın günümüz Türkçesine aktarımı): Kırmızı daireler 1908 öncesinde mevcut olan okulları, siyah daireler 1908 sonrasında Eylül 1914'e kadar açılan okulları gösterir. Çift çizgili daireler kız okullarını, daire içindeki bölmeler dershane sayılarını, daire üzerindeki rakamlar o türden okul sayılarını gösterir. Üçgen işaretler numune mekteplerini gösterir. Karma okullar erkek okulları arasında gösterilmiştir."
+        }
+      ]
+    }
+  ],
+  "yayindan_once_kontrol": [
+    "Altın Elbiseli Adam görsellerinin yeniden kullanım izni ve mümkünse arkeolojik müze envanter numaraları doğrulanmalı.",
+    "SALT EPL013 haritasının kamuya açık sitede yeniden sunulması için lisans/kullanım koşulları doğrulanmalı.",
+    "Haritanın alt kısmındaki tam Osmanlıca açıklamanın uzman kontrolünden geçmiş Türkçe aktarımı ayrı erişilebilir bölümde gösterilmeli; eksik kayıt bilgisi ilk açıklamada hazır bir sonuç gibi sunulmamalı.",
+    "Uzmanlar kaynak açıklamalarının tarihsel doğruluğunu ve tek ana soruların açıklığını onaylamalı.",
+    "Canlı Supabase projesi ve öğrenci kayıtları değiştirilmemeli."
+  ]
+}
