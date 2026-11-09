@@ -56,8 +56,10 @@ function frame(active=false) {
   $('#research').hidden=!active;
   $('#researchText').textContent=active ? work.activity_snapshot.question : '';
   $('#sectionTitle').textContent=active ? work.activity_snapshot.title : 'TARİHSEL KAYNAK DEĞERLENDİRME';
+  const stageLabel = active && (stages[work.state.stage] || 'Çalışma tamamlandı');
+  if (active) $('#sectionTitle').textContent += ' · '+stageLabel;
   $('#steps').innerHTML=active ? Object.entries(stages).map(([id,name],i)=>
-    `<div class="step" ${work.state.stage===id?'aria-current="step"':''}><span class="num">${i+1}</span>${name}</div>`).join('') : '';
+    `<div class="step ${work.state.stage===id?'active':''}" ${work.state.stage===id?'aria-current="step"':''}><span class="num">${i+1}</span>${name}</div>`).join('') : '';
 }
 function home() {
   frame();
@@ -80,10 +82,16 @@ function showTopics(topics) {
   work=null;
   frame();
   $('#screen').innerHTML=`<section class="full-panel"><div class="pane-header"><h1>Konu Başlıkları</h1></div><div class="pane-body topic-list">${topics.map(t=>
-    `<button data-topic="${esc(t.id)}"><strong>${esc(t.title)}</strong><small>${t.demo?'Demo · ':''}${!t.stage?'Başlanmadı':t.stage==='done'?'Tamamlandı':'Devam Ediyor'}</small></button>`).join('') || '<p>Henüz konu eklenmedi.</p>'}</div></section>`;
+    `<button data-topic="${esc(t.id)}"><strong>${esc(t.title)}</strong><small>${t.demo?'Demo · ':''}${!t.stage?'Başlanmadı':t.stage==='done'?'Tamamlandı':'Devam Ediyor'}</small></button>`).join('') || '<p>Henüz konu eklenmedi.</p>'}${survey(topics)}</div></section>`;
   document.querySelectorAll('[data-topic]').forEach(button=>button.onclick=()=>run(async ()=>{
-    work=await request('/works',{topic_id:button.dataset.topic});
+    const selected=button.dataset.topic;
+    const opened=await request('/works',{topic_id:selected});
+    if (opened.topic_id!==selected || opened.activity_snapshot?.id!==selected) {
+      throw Error('Seçilen konu ile çalışma eşleşmedi. Konu listesini yeniden aç.');
+    }
+    work=opened;
     draw();
+    await updateSummarySurvey();
   }));
 }
 function sourceHTML(source) {
@@ -104,19 +112,26 @@ function button(action,label) {
 function editor(label) {
   return `<label for="response">${label}</label><textarea id="response" rows="5" maxlength="12000">${esc(work.state.draft)}</textarea>`;
 }
-function feedbackLink() {
+async function updateSummarySurvey() {
+  if (work?.state.stage!=='done') return;
+  const topics=await request('/topics');
+  $('#summarySurvey').innerHTML=survey(topics);
+}
+function survey(topics) {
+  if (!topics.length || !topics.every(t=>t.stage==='done')) return '';
+
   try {
     const url=new URL(window.TARIHIZ_CONFIG.feedbackFormUrl);
     if(url.protocol==='https:' && ['docs.google.com','forms.gle'].includes(url.hostname))
       return `<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Ankete Katıl</a>`;
   } catch {}
-  return '';
+  return '<button type="button" disabled>Ankete Katıl</button><small>Anket bağlantısı henüz eklenmedi.</small>';
 }
 function activityBody() {
   const s=work.state;
   if(s.stage==='source') return button('examine','İlk Değerlendirmeye Geç');
   if(s.stage==='initial' || s.stage==='final') return editor(work.activity_snapshot.question)+button(s.stage,s.stage==='initial'?'İlk Yanıtımı Gönder':'Çalışmayı Tamamla');
-  if(s.stage==='done') return `<h3>İlk değerlendirmem</h3><p>${esc(s.initial.text)}</p><details><summary>Sorgulama konuşması</summary>${transcript()}</details><h3>Son değerlendirmem</h3><p>${esc(s.final.text)}</p><p>Araştırmamıza destek olduğunuz için teşekkür ederiz.</p>${feedbackLink()}`;
+  if(s.stage==='done') return `<h3>İlk değerlendirmem</h3><p>${esc(s.initial.text)}</p><details><summary>Sorgulama konuşması</summary>${transcript()}</details><h3>Son değerlendirmem</h3><p>${esc(s.final.text)}</p><p>Araştırmamıza destek olduğunuz için teşekkür ederiz.</p><div id="summarySurvey"></div>`;
   const waiting=s.messages.at(-1)?.role==='assistant';
   return transcript()+(waiting?editor('Soruya yanıtın')+button('reply','Yanıtımı Gönder'):button('ask',s.messages.length?'Yanıtıma Geri Bildirim Al':'Sorgulamaya Başla'))+
     (s.suggestFinish?'<p>Son değerlendirmene geçebilirsin.</p>':'')+
@@ -155,6 +170,7 @@ function draw() {
     if(['reply','initial','final'].includes(action)) body.text=field.value;
     work=await request('/works/'+work.id,body);
     draw();
+    if (action==='final') await updateSummarySurvey();
     if (action==='reply') {
       work=await request('/works/'+work.id,{action:'ask',revision:work.revision});
       draw();
