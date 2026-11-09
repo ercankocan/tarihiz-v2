@@ -85,3 +85,17 @@ test('İki konu kartı farklı kayıt ve kaynak açar; anket tüm mevcut konular
   assert.equal(ctx.survey([]),'');
   mismatch=true;await buttons[1].onclick();assert.match(element('#status').textContent,/eşleşmedi/);
 });
+test('Görsel onayı ve mobil sekmede taslağın korunması',()=>{
+  const nodes=new Map();
+  const element=q=>{if(!nodes.has(q))nodes.set(q,{dataset:{},value:'',classList:{toggle(){}},setAttribute(){}});return nodes.get(q);};
+  const ctx={document:{querySelector:element,querySelectorAll:()=>[]},URL,window:{},matchMedia:()=>({matches:true}),setInterval(){}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),ctx);
+  const [gold,map]=require('../pilot-konular-taslak.json').konular.map(t=>t.sources[0]);
+  assert.doesNotMatch(ctx.sourceHTML(gold),/<img|Haritadaki İşaretler/);
+  assert.match(ctx.sourceHTML(map),/Haritadaki İşaretler/);
+  assert.match(ctx.sourceHTML({...map,image_ready:true}),/data-enlarge/);
+  element('#response').value='Yarım kalan yanıt';
+  ctx.setPane('source');ctx.setPane('evaluation');
+  assert.equal(element('#response').value,'Yarım kalan yanıt');
+  assert.equal(element('.topic-work').dataset.pane,'evaluation');
+});

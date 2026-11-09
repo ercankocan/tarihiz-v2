@@ -13,7 +13,7 @@ function sandbox() {
   const participants=['student1','student2'].map(code=>({id:randomUUID(),active:true,code_hash:hash(code)}));
   const tables={tarihiz_topics:topics,tarihiz_topic_works:works,tarihiz_sessions:sessions,tarihiz_participants:participants};
   const add=title=>{
-    const topic={id:randomUUID(),title,question:title+' hangi yorumu destekler?',demo:true,sources:[{id:randomUUID(),title,text:'Örnek belge'}]};
+    const topic={id:randomUUID(),pilot:true,title,question:title+' hangi yorumu destekler?',demo:true,sources:[{id:randomUUID(),title,text:'Örnek belge'}]};
     topics.push(topic);return topic;
   };
   async function fakeFetch(address,opts) {
@@ -117,4 +117,24 @@ test('Anonim öğrenci ve konu akışı',async t=>{
     await api('/works/'+other.id,second,{action:'examine',revision:0},404);
     await api('/works/'+other.id,token,{action:'examine',revision:99},409);
   });
+});
+test('Pilot kataloğu, SQL ve eski kayıtların korunması', async()=>{
+  const {topics,api,add,works}=sandbox();
+  const pilots=require('../pilot-konular-taslak.json').konular;
+  const sql=fs.readFileSync(path.join(__dirname,'../supabase/pilot.sql'),'utf8');
+  assert.deepEqual(JSON.parse(sql.split('$topics$')[1]),pilots);
+  const legacy=add('Eski demo');legacy.pilot=false;
+  topics.push(...pilots);
+  const session=await api('/session',null,{code:'student1'});
+  assert.deepEqual(session.topics.map(t=>t.id),pilots.map(t=>t.id));
+  for(const t of pilots){
+    const w=await api('/works',session.token,{topic_id:t.id});
+    assert.equal(w.activity_snapshot.question,t.question);
+    assert.equal(t.sources.length,1);
+    assert.equal(t.sources[0].image_ready,false);
+    assert.ok(!/^https?:/.test(t.sources[0].image));
+  }
+  works.push({id:randomUUID(),participant_id:works[0].participant_id,topic_id:legacy.id});
+  await api('/works',session.token,{topic_id:legacy.id},404);
+  assert.equal(works.length,3);
 });

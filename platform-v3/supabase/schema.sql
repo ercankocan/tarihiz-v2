@@ -76,3 +76,5 @@ revoke all on public.tarihiz_topics, public.tarihiz_topic_works from public, ano
 grant select on public.tarihiz_topics to service_role;
 grant select,insert,update on public.tarihiz_topic_works to service_role;
 commit;
+
+alter table public.tarihiz_topics add column if not exists pilot boolean not null default false;

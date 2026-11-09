@@ -36,3 +36,14 @@
 .ai-pending span {display:inline-block;color:#87641a;font-size:1.6rem;animation:spin 1.4s linear infinite;}
 .turn-feedback {border-inline-start:2px solid var(--gold);padding-inline-start:.65rem;}
 @media(prefers-reduced-motion:reduce){.ai-pending span{animation:none;}}
+.topic-work figure{margin:0 0 1em}
+.topic-work .source-image{height:auto;width:100%;max-height:none;object-fit:contain}
+.topic-work [hidden]{display:none!important}
+#imageViewer{width:min(94vw,1400px);max-width:96vw;padding:12px}
+.zoom-tools{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.zoom-area{overflow:auto;max-height:76dvh}
+#largeSource{display:block;width:100%;max-width:none;height:auto}
+@media(max-width:760px){
+.topic-work[data-pane=source] .evaluation-pane,.topic-work[data-pane=evaluation] .source-pane{display:none}
+.mobile-tabs button[aria-pressed=true]{background:var(--navy);color:white}
+}

@@ -6,6 +6,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
 const stages = {source:'Kaynağı İncele', initial:'İlk Değerlendirme', chat:'Yapay Zekâ ile Sorgulama', final:'Son Değerlendirme'};
 let token = '', work = null, busy = false;
 
+let mobilePane='source';
 let draftTimer;
 let draftWrites=Promise.resolve();
 function queueDraft(field) {
@@ -90,19 +91,41 @@ function showTopics(topics) {
       throw Error('Seçilen konu ile çalışma eşleşmedi. Konu listesini yeniden aç.');
     }
     work=opened;
+    mobilePane=work.state.stage==='source'?'source':'evaluation';
     draw();
     await updateSummarySurvey();
   }));
 }
 function sourceHTML(source) {
-  let image='';
+  // Only teacher-supplied local files are eligible to appear in the pilot.
+  const available=source.image_ready===true && /^pilot-gorseller\/[a-z0-9-]+\/kaynak\.jpg$/.test(source.image);
+  const image=available
+    ? `<figure><img hidden class="source-image" src="${esc(source.image)}" alt="${esc(source.title)}" onload="this.hidden=false;this.nextElementSibling.hidden=false" onerror="this.hidden=true;this.nextElementSibling.hidden=true;this.parentElement.lastElementChild.hidden=false"><button hidden data-enlarge>Görseli büyüt</button><p hidden>Görsel yüklenemedi.</p></figure>`
+    : '<p class="notice">Kaynak görseli henüz yüklenmedi.</p>';
+  const metadata=Object.entries(source.metadata || {}).map(([key,value])=>`<dt>${esc(key)}</dt><dd>${esc(value)}</dd>`).join('');
+  const legend=source.legend?.length ? `<h3>Haritadaki İşaretler</h3><ul>${source.legend.map(line=>`<li>${esc(line)}</li>`).join('')}</ul>` : '';
+  let reference='';
   try {
-    const url=new URL(source.image);
-    if(url.protocol==='https:') image=`<img class="source-image" src="${esc(url.href)}" alt="${esc(source.description || source.title)}">`;
+    const url=new URL(source.reference_url);
+    if(url.protocol==='https:') reference=`<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Kurum kaydı</a>`;
   } catch {}
-  const fields=[['creator','Oluşturan'],['date','Tarih'],['place','Yer'],['type','Tür'],['reference','Kaynak'],['purpose','Amaç']];
-  return `<article><h3>${esc(source.title)}</h3>${image}<p class="source-text">${esc(source.text)}</p><details><summary>Kaynak künyesi</summary><dl class="metadata">${fields.filter(([key])=>source[key]).map(([key,label])=>`<dt>${label}</dt><dd>${esc(source[key])}</dd>`).join('')}</dl></details></article>`;
+  return `<article><h3>${esc(source.title)}</h3>${image}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
 }
+function setPane(pane) {
+  mobilePane=pane;
+  $('.topic-work').dataset.pane=pane;
+  document.querySelectorAll('[data-pane-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paneChoice===pane)));
+}
+function openImage(button) {
+  const img=button.previousElementSibling;
+  const dialog=$('#imageViewer');
+  $('#largeSource').src=img.src;
+  $('#largeSource').alt=img.alt;
+  $('#imageScale').value='100';
+  $('#largeSource').style.width='100%';
+  dialog.showModal();
+}
+
 function transcript() {
   return work.state.messages.map(m=>`<div class="bubble ${m.role==='student'?'student':''}"><small>${m.role==='student'?'Sen':'Tarihİz'}</small>${m.feedback ? `<p class="turn-feedback">${esc(m.feedback)}</p>` : ''}<p>${esc(m.text)}</p></div>`).join('');
 }
@@ -144,8 +167,10 @@ function draw() {
   const sourceTop=$('.source-pane .pane-body')?.scrollTop || 0;
   frame(true);
   const a=work.activity_snapshot;
-  $('#screen').innerHTML=`<div class="topic-work"><section class="pane source-pane"><div class="pane-header"><h2>${esc(a.title)}</h2></div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${a.sources.map(sourceHTML).join('')}</div></section>
-  <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${activityBody()}</div><div class="ai-pending" role="status"><span aria-hidden="true">✦</span> Yanıtınız hazırlanıyor…</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
+  $('#screen').innerHTML=`<div class="mobile-tabs"><button data-pane-choice="source" aria-pressed="${mobilePane==='source'}">Kaynağı İncele</button><button data-pane-choice="evaluation" aria-pressed="${mobilePane==='evaluation'}">Değerlendirmem</button></div><div class="topic-work" data-pane="${mobilePane}"><section class="pane source-pane"><div class="pane-header"><h2>${esc(a.title)}</h2></div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${a.sources.map(sourceHTML).join('')}</div></section>
+  <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${['source','chat'].includes(work.state.stage)?`<p class="main-question">${esc(a.question)}</p>`: ''}${activityBody()}</div><div class="ai-pending" role="status"><span aria-hidden="true">✦</span> Yanıtınız hazırlanıyor…</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
+  document.querySelectorAll('[data-pane-choice]').forEach(b=>b.onclick=()=>setPane(b.dataset.paneChoice));
+  document.querySelectorAll('[data-enlarge]').forEach(b=>b.onclick=()=>openImage(b));
   if(sameChat) {
     $('#activityBody').scrollTop=top;
     $('#screen').scrollTop=screenTop;
@@ -190,5 +215,7 @@ setInterval(() => {
   slides[slide].setAttribute('aria-hidden','false');
 }, 8000);
 $('#about').onclick=()=>$('#aboutDialog').showModal();
+$('#closeViewer').onclick=()=>$('#imageViewer').close();
+$('#imageScale').oninput=e=>$('#largeSource').style.width=e.target.value+'%';
 $('#closeAbout').onclick=()=>$('#aboutDialog').close();
 home();
