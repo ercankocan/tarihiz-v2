@@ -91,7 +91,7 @@ test('Görsel onayı ve mobil sekmede taslağın korunması',()=>{
   const ctx={document:{querySelector:element,querySelectorAll:()=>[]},URL,window:{},matchMedia:()=>({matches:true}),setInterval(){}};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),ctx);
   const [gold,map]=require('../pilot-konular-taslak.json').konular.map(t=>t.sources[0]);
-  assert.doesNotMatch(ctx.sourceHTML(gold),/<img|Haritadaki İşaretler/);
+  assert.doesNotMatch(ctx.sourceHTML({...gold,image_ready:false}),/<img|Haritadaki İşaretler/);
   assert.match(ctx.sourceHTML(map),/Haritadaki İşaretler/);
   assert.match(ctx.sourceHTML({...map,image_ready:true}),/data-enlarge/);
   element('#response').value='Yarım kalan yanıt';

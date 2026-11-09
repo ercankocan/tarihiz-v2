@@ -109,6 +109,9 @@ function sourceHTML(source) {
     const url=new URL(source.reference_url);
     if(url.protocol==='https:') reference=`<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Kurum kaydı</a>`;
   } catch {}
+  if (source.image_credit_url?.startsWith('https://commons.wikimedia.org/wiki/')) {
+    reference+=` · <a href="${esc(source.image_credit_url)}" target="_blank" rel="noopener noreferrer">Fotoğraf kaydı</a>`;
+  }
   return `<article><h3>${esc(source.title)}</h3>${image}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
 }
 function setPane(pane) {
