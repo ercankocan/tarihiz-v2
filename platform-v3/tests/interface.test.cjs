@@ -120,3 +120,12 @@ test('Beş görsel arasında geçiş yanıtı ve sohbet konumunu korur',()=>{
   }
   assert.ok(ctx.sourceGallery(ctx.activity).includes(ctx.activity.sources[4].image));
 });
+
+test('Rize metni ve ayrı künyesi görünür; başlıklar numaralanır',()=>{
+ const nodes=new Map();const el=q=>{if(!nodes.has(q))nodes.set(q,{classList:{toggle(){}},dataset:{}});return nodes.get(q);};
+ const ctx={document:{querySelector:el,querySelectorAll:()=>[]},URL,window:{TARIHIZ_CONFIG:{}},matchMedia:()=>({matches:true}),setInterval(){}};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),ctx);
+ const topics=require('../pilot-konular-taslak.json').konular.slice().sort((a,b)=>a.sort_order-b.sort_order);
+ ctx.showTopics(topics);assert.match(el('#screen').innerHTML,/1\. Göbeklitepe/);assert.match(el('#screen').innerHTML,/5\. Rize/);
+ const html=ctx.sourceHTML(topics[4].sources[0]);assert.match(html,/Minibüs Yerine Kamyon/);assert.match(html,/Pazartesi ve Cuma/);assert.match(html,/26 Ağustos 2024/);assert.match(html,/Çekim tarihi/);
+});

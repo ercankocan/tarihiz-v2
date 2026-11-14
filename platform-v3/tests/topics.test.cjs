@@ -31,6 +31,7 @@ function sandbox() {
       if(v.startsWith('gt.')) return row[key]>v.slice(3);
       return true;
     }));
+    if(table===topics && url.searchParams.get('order')==='sort_order.asc,title.asc,id.asc') matches.sort((a,b)=>(a.sort_order??1000)-(b.sort_order??1000)||a.title.localeCompare(b.title)||a.id.localeCompare(b.id));
     if(opts.method==='PATCH') matches.forEach(row=>Object.assign(row,body));
     if(opts.method==='POST') {
       if(table!==works || !works.some(w=>w.topic_id===body.topic_id && w.participant_id===body.participant_id))
@@ -140,7 +141,7 @@ test('Pilot kataloğu, SQL ve eski kayıtların korunması', async()=>{
   const legacy=add('Eski demo');legacy.pilot=false;
   topics.push(...pilots);
   const session=await api('/session',null,{code:'student1'});
-  assert.deepEqual(session.topics.map(t=>t.id),pilots.map(t=>t.id));
+  assert.deepEqual(session.topics.map(t=>t.id),[...pilots].sort((a,b)=>a.sort_order-b.sort_order).map(t=>t.id));
   for(const t of pilots){
     const w=await api('/works',session.token,{topic_id:t.id});
     assert.equal(w.activity_snapshot.question,t.question);

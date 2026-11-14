@@ -70,7 +70,7 @@ async function guidance(work) {
   return output;
 }
 async function topics(owner) {
-  const catalog = await database('GET','tarihiz_topics',{pilot:'eq.true',select:'id,title,demo',order:'title.asc'});
+  const catalog = await database('GET','tarihiz_topics',{pilot:'eq.true',select:'id,title,demo,sort_order',order:'sort_order.asc,title.asc,id.asc'});
   const works = await database('GET','tarihiz_topic_works',{participant_id:'eq.'+owner,select:'topic_id,stage:state->>stage'});
   const stages = new Map(works.map(row => [row.topic_id,row.stage]));
   return catalog.map(topic => ({...topic,stage:stages.get(topic.id) || null}));

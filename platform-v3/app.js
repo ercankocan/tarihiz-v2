@@ -83,8 +83,8 @@ function login() {
 function showTopics(topics) {
   work=null;
   frame();
-  $('#screen').innerHTML=`<section class="full-panel"><div class="pane-header"><h1>Konu Başlıkları</h1></div><div class="pane-body topic-list">${topics.map(t=>
-    `<button data-topic="${esc(t.id)}"><strong>${esc(t.title)}</strong><small>${t.demo?'Demo · ':''}${!t.stage?'Başlanmadı':t.stage==='done'?'Tamamlandı':'Devam Ediyor'}</small></button>`).join('') || '<p>Henüz konu eklenmedi.</p>'}${survey(topics)}</div></section>`;
+  $('#screen').innerHTML=`<section class="full-panel"><div class="pane-header"><h1>Konu Başlıkları</h1></div><div class="pane-body topic-list">${topics.map((t,i)=>
+    `<button data-topic="${esc(t.id)}"><strong>${i+1}. ${esc(t.title)}</strong><small>${t.demo?'Demo · ':''}${!t.stage?'Başlanmadı':t.stage==='done'?'Tamamlandı':'Devam Ediyor'}</small></button>`).join('') || '<p>Henüz konu eklenmedi.</p>'}${survey(topics)}</div></section>`;
   document.querySelectorAll('[data-topic]').forEach(button=>button.onclick=()=>run(async ()=>{
     const selected=button.dataset.topic;
     const opened=await request('/works',{topic_id:selected});
@@ -109,12 +109,13 @@ function sourceHTML(source, topicTitle = '') {
   let reference='';
   try {
     const url=new URL(source.reference_url);
-    if(url.protocol==='https:') reference=`<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Kurum kaydı</a>`;
+    if(url.protocol==='https:') reference=`<a href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">Kaynak sayfası</a>`;
   } catch {}
   if (source.image_credit_url?.startsWith('https://commons.wikimedia.org/wiki/')) {
     reference+=` · <a href="${esc(source.image_credit_url)}" target="_blank" rel="noopener noreferrer">Fotoğraf kaydı</a>`;
   }
-  return `<article>${source.title !== topicTitle ? `<h3>${esc(source.title)}</h3>` : ''}${image}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
+  const companion=source.companion ? `<section class="companion-source"><h3>${esc(source.companion.title)}</h3><div class="source-excerpt">${source.companion.text.split(/\n\n/).map(p=>`<p>${esc(p)}</p>`).join('')}</div><dl class="metadata">${Object.entries(source.companion.metadata || {}).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></section>` : '';
+  return `<article>${source.title !== topicTitle ? `<h3>${esc(source.title)}</h3>` : ''}${image}${companion}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
 }
 function sourceGallery(activity) {
   if (selectedSource >= activity.sources.length) selectedSource=0;

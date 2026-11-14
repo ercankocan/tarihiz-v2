@@ -78,3 +78,6 @@ grant select,insert,update on public.tarihiz_topic_works to service_role;
 commit;
 
 alter table public.tarihiz_topics add column if not exists pilot boolean not null default false;
+
+-- Display order, independent of stable topic identities.
+alter table public.tarihiz_topics add column if not exists sort_order integer not null default 1000;

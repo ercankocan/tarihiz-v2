@@ -1,8 +1,9 @@
--- Existing schema required. Re-running preserves curated image metadata.
-begin;
+-- Idempotent catalog seed; existing content is preserved.
 alter table public.tarihiz_topics add column if not exists pilot boolean not null default false;
-insert into public.tarihiz_topics(id,title,question,sources,demo,pilot)
-select id,title,question,sources,demo,pilot from jsonb_to_recordset($topics$
+begin;
+alter table public.tarihiz_topics add column if not exists sort_order integer not null default 1000;
+insert into public.tarihiz_topics(id,title,question,sources,demo,pilot,sort_order)
+select id,title,question,sources,demo,pilot,sort_order from jsonb_to_recordset($topics$
 [
   {
     "id": "20270000-0000-4000-8000-000000000001",
@@ -32,7 +33,8 @@ select id,title,question,sources,demo,pilot from jsonb_to_recordset($topics$
       }
     ],
     "demo": false,
-    "pilot": true
+    "pilot": true,
+    "sort_order": 20
   },
   {
     "id": "20270000-0000-4000-8000-000000000002",
@@ -68,7 +70,8 @@ select id,title,question,sources,demo,pilot from jsonb_to_recordset($topics$
       }
     ],
     "demo": false,
-    "pilot": true
+    "pilot": true,
+    "sort_order": 40
   },
   {
     "id": "20270000-0000-4000-8000-000000000003",
@@ -167,14 +170,79 @@ select id,title,question,sources,demo,pilot from jsonb_to_recordset($topics$
       }
     ],
     "demo": false,
-    "pilot": true
+    "pilot": true,
+    "sort_order": 10
+  },
+  {
+    "id": "20270000-0000-4000-8000-000000000004",
+    "title": "Osmanlı’da Kahvehane Hayatı",
+    "question": "Bu minyatürden hareketle, kahvehanelerin Osmanlı toplumunun gündelik yaşamındaki yeri hakkında hangi çıkarımlarda bulunabiliriz?",
+    "demo": false,
+    "pilot": true,
+    "sources": [
+      {
+        "id": "osmanli-kahvehane",
+        "title": "Bir Osmanlı kahvehanesi tasviri",
+        "image": "pilot-gorseller/osmanli-kahvehane/kaynak.jpg",
+        "image_ready": true,
+        "reference_url": "https://tr.wikipedia.org/wiki/Kahvehane",
+        "image_credit_url": "https://commons.wikimedia.org/wiki/File:MeddahOttomman.png",
+        "description": "Görsel, Vikipedi’deki Kahvehane maddesinde bir Osmanlı kahvehanesinde meddahı betimleyen minyatür olarak sunulmaktadır. Kalabalık bir iç mekânda farklı gruplar hâlindeki kişiler, fincanlar, kitap benzeri nesneler ve oyun düzenekleri görülmektedir. Eserin sanatçısı, özgün yazması ve üretim amacı başvurulan dosya kaydında belirtilmemiştir. Bir tasvirin görülebilen ayrıntılarıyla bu ayrıntılardan yapılan yorumlar birbirinden ayrılmalıdır.",
+        "metadata": {
+          "Kaynak türü": "Minyatürün dijital kopyası",
+          "İlişkilendirilen bağlam": "Osmanlı kahvehanesi",
+          "Sanatçı": "Başvurulan kayıtta belirtilmemiştir",
+          "Tarih": "Kesin tarih doğrulanmamıştır; Commons açıklamasında muhtemelen 16. yüzyıl denmektedir",
+          "Özgün eser / koleksiyon": "Başvurulan kayıtta belirtilmemiştir",
+          "Dijital erişim": "Vikipedi / Wikimedia Commons",
+          "Dosya adı": "MeddahOttomman.png",
+          "Kaynak zinciri": "Commons dosya kaydı kaynak olarak bir Onedio sayfasını göstermektedir",
+          "Hak bilgisi": "Commons kaydında ABD’de kamu malı etiketi bulunmaktadır",
+          "Sunum": "Yüklenen PNG’den JPEG görüntüleme kopyası; kırpma veya içerik ekleme yapılmamıştır"
+        }
+      }
+    ],
+    "sort_order": 30
+  },
+  {
+    "id": "20270000-0000-4000-8000-000000000005",
+    "title": "Rize’de Köyden Şehre: Ulaşım ve Gündelik Yaşam",
+    "question": "Bu fotoğraf ve metinden hareketle, ulaşımın Rize’de köy ve şehir arasındaki gündelik ilişkilerde nasıl bir yeri olduğunu söyleyebiliriz?",
+    "demo": false,
+    "pilot": true,
+    "sort_order": 50,
+    "sources": [
+      {
+        "id": "rize-kamyon-fotografi",
+        "title": "Kamyonlarla yolculuk",
+        "image": "pilot-gorseller/rize-ulasim/kaynak.jpg",
+        "image_ready": true,
+        "description": "Fotoğrafı ve Rize’de geçmişteki ulaşımı anlatan gazete metnini birlikte incele. Fotoğrafta görebildiklerinle metinden öğrendiklerini karşılaştır.",
+        "metadata": {
+          "Kaynak türü": "Tarihsel fotoğrafın dijital kopyası",
+          "Fotoğrafçı": "Belirtilmemiştir",
+          "Çekim tarihi": "Kesin tarih doğrulanmamıştır",
+          "Özgün arşiv": "Belirtilmemiştir",
+          "Bağlam": "Rize’de geçmişte ulaşım; kullanıcı tarafından paylaşılan görsel"
+        },
+        "reference_url": "https://www.tekbayrak.com.tr/Haber/TARIHE-RIZE-YOLCULUGU-24597.html",
+        "companion": {
+          "id": "rize-minibus-yerine-kamyon",
+          "title": "Minibüs Yerine Kamyon",
+          "text": "Mahalle ve köylerde yaşayan insanlar haftanın belirli günlerinde şehir merkezine gelerek eksiklerini alıyorlardı. Mahallelerden kamyonlar üzerinde seyahat eden Rizeliler balık istifi gibi kamyonlarla tarihi yollardan şehir merkezine gelirlerdi. Rize eski yolu olan İyidere tarafındaki yol ise Üniversite önünden geçerek şehir merkezine gelirlerdi.\n\nKöylerden kamyonlara binen insanlar Pazartesi ve Cuma günleri kamyonlara binerek köylerden ve ilçelerden şehir merkezine gelerek günlük alış verişlerini yaparak tekrar kamyonlarla köy ve mahallelerine dönerlerdi. Köylerden getirilen ürünler Pazar yerlerine satıldıktan sonra köy ve mahallelerden gelen Rizeliler elde ettikleri gelirler ile Tuz, Şeker gibi ihtiyaçlarını alarak dönüş yoluna geçiyorlardı.",
+          "metadata": {
+            "Yazar": "Tufan Kuleli",
+            "Yazı": "Tarihe Rize Yolculuğu",
+            "Yayın": "Tek Bayrak Gazetesi",
+            "Yayın tarihi": "26 Ağustos 2024",
+            "Kaynak türü": "Geçmişi anlatan, sonradan yazılmış gazete metni",
+            "Not": "Yayın tarihi fotoğrafın çekim tarihi değildir. Alıntıdaki yazım korunmuştur."
+          }
+        }
+      }
+    ]
   }
 ]
-$topics$::jsonb) as p(id uuid,title text,question text,sources jsonb,demo boolean,pilot boolean)
-on conflict(id) do update
-set sources=jsonb_set(tarihiz_topics.sources,'{0}',(tarihiz_topics.sources->0) ||
-    jsonb_build_object('image',excluded.sources->0->'image','image_ready',true,
-      'metadata',(tarihiz_topics.sources->0->'metadata') || (excluded.sources->0->'metadata')) ||
-    case when excluded.sources->0 ? 'image_credit_url' then jsonb_build_object('image_credit_url',excluded.sources->0->'image_credit_url') else '{}'::jsonb end)
-where tarihiz_topics.pilot and tarihiz_topics.sources->0->>'id'=excluded.sources->0->>'id';
+$topics$::jsonb) as p(id uuid,title text,question text,sources jsonb,demo boolean,pilot boolean,sort_order integer)
+on conflict(id) do update set sort_order=excluded.sort_order;
 commit;
