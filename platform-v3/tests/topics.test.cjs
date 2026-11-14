@@ -105,6 +105,20 @@ test('Anonim öğrenci ve konu akışı',async t=>{
     assert.deepEqual(await open(b.id),w);await act('final','tekrar',422);
     assert.equal((await login('student1')).topics.find(x=>x.id===b.id).stage,'done');
   });
+  await t.test('Sonradan eklenen görsel geçmiş yanıtları korur',async()=>{
+    b.sources[0].image='pilot-gorseller/esnaf/kaynak.jpg';
+    b.sources[0].image_ready=true;
+    b.sources[0].image_credit_url='https://commons.wikimedia.org/wiki/File:Example.jpg';
+    b.sources[0].metadata={Görsel:'Öğretmen tarafından eklenen görsel'};
+    const savedState=structuredClone(w.state);
+    const savedQuestion=w.activity_snapshot.question;
+    w=await open(b.id);
+    assert.equal(w.activity_snapshot.sources[0].image,b.sources[0].image);
+    assert.equal(w.activity_snapshot.sources[0].image_ready,true);
+    assert.equal(w.activity_snapshot.sources[0].metadata.Görsel,'Öğretmen tarafından eklenen görsel');
+    assert.equal(w.activity_snapshot.question,savedQuestion);
+    assert.deepEqual(w.state,savedState);
+  });
   await t.test('Aynı öğrenci iki konuda ayrı kayıt alır',async()=>{
     other=await open(a.id);assert.equal(other.participant_id,w.participant_id);
     assert.notEqual(other.id,w.id);assert.equal(other.state.initial,null);
