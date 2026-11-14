@@ -81,7 +81,41 @@ async function openTopic(owner,id) {
   requireCondition(topic,'Konu bulunamadı.',404);
   const filter = {participant_id:'eq.'+owner,topic_id:'eq.'+id};
   const existing = await database('GET','tarihiz_topic_works',filter);
-  if (existing.length) return existing[0];
+  if (existing.length) {
+    const work = existing[0];
+    // Enrich old snapshots with newly approved local source images without
+    // changing the historical question, source text, student answers, or dialogue.
+    const snapshot = structuredClone(work.activity_snapshot);
+    let changed = false;
+    snapshot.sources = snapshot.sources.map(source => {
+      const catalogSource = topic.sources.find(item => item.id === source.id);
+      if (!catalogSource || catalogSource.image_ready !== true ||
+          !/^pilot-gorseller\/[a-z0-9-]+\/kaynak\.jpg$/.test(catalogSource.image || '')) return source;
+      const updated = {...source};
+      for (const key of ['image','image_ready','image_credit_url']) {
+        if (catalogSource[key] != null && updated[key] !== catalogSource[key]) {
+          updated[key] = catalogSource[key];
+          changed = true;
+        }
+      }
+      if (catalogSource.metadata && typeof catalogSource.metadata === 'object') {
+        updated.metadata = {...(updated.metadata || {})};
+        for (const [key,value] of Object.entries(catalogSource.metadata)) {
+          if (!(key in updated.metadata)) {
+            updated.metadata[key] = value;
+            changed = true;
+          }
+        }
+      }
+      return updated;
+    });
+    if (!changed) return work;
+    const rows = await database('PATCH','tarihiz_topic_works',{
+      id:'eq.'+work.id,participant_id:'eq.'+owner
+    },{activity_snapshot:snapshot});
+    requireCondition(rows.length,'Çalışma kaynağı güncellenemedi.',503);
+    return rows[0];
+  }
   requireCondition(topic.sources.every(s => s && typeof s.id==='string' && s.id.trim() && (s.text?.trim() || (s.image && s.description?.trim()))) &&
     new Set(topic.sources.map(s=>s.id)).size===topic.sources.length,'Kaynak bilgileri eksik.');
   await database('POST','tarihiz_topic_works',{on_conflict:'participant_id,topic_id'},{
