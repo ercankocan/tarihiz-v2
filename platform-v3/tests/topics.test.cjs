@@ -144,12 +144,14 @@ test('Pilot kataloğu, SQL ve eski kayıtların korunması', async()=>{
   for(const t of pilots){
     const w=await api('/works',session.token,{topic_id:t.id});
     assert.equal(w.activity_snapshot.question,t.question);
-    assert.equal(t.sources.length,1);
+    assert.ok(t.sources.length>=1);
+    assert.deepEqual(w.activity_snapshot.sources,t.sources);
+    for(const source of t.sources) assert.ok(fs.existsSync(path.join(__dirname,"..",source.image)));
     assert.equal(t.sources[0].image_ready,true);
     assert.ok(fs.existsSync(path.join(__dirname,"..",t.sources[0].image)));
     assert.ok(!/^https?:/.test(t.sources[0].image));
   }
   works.push({id:randomUUID(),participant_id:works[0].participant_id,topic_id:legacy.id});
   await api('/works',session.token,{topic_id:legacy.id},404);
-  assert.equal(works.length,3);
+  assert.equal(works.length,pilots.length+1);
 });

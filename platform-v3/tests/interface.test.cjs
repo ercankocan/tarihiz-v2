@@ -99,3 +99,24 @@ test('Görsel onayı ve mobil sekmede taslağın korunması',()=>{
   assert.equal(element('#response').value,'Yarım kalan yanıt');
   assert.equal(element('.topic-work').dataset.pane,'evaluation');
 });
+
+test('Beş görsel arasında geçiş yanıtı ve sohbet konumunu korur',()=>{
+  const nodes=new Map();
+  const element=q=>{if(!nodes.has(q))nodes.set(q,{dataset:{},value:'',scrollTop:0,classList:{toggle(){}},setAttribute(){}});return nodes.get(q);};
+  const buttons=Array.from({length:5},(_,i)=>({dataset:{sourceChoice:String(i)},setAttribute(k,v){this[k]=v;}}));
+  const ctx={document:{querySelector:element,querySelectorAll:q=>q==='[data-source-choice]'?buttons:[]},URL,window:{},matchMedia:()=>({matches:true}),setInterval(){}};
+  vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),ctx);
+  ctx.activity=require('../pilot-konular-taslak.json').konular[2];
+  vm.runInContext('work={activity_snapshot:activity};',ctx);
+  assert.equal((ctx.sourceGallery(ctx.activity).match(/data-source-choice=/g)||[]).length,5);
+  element('#response').value='Henüz göndermediğim yorum';element('#activityBody').scrollTop=123;
+  ctx.bindSourceGallery();
+  for(let i=0;i<5;i++) {
+    buttons[i].onclick();
+    assert.ok(element('#selectedSource').innerHTML.includes(ctx.activity.sources[i].image));
+    assert.equal(buttons[i]['aria-pressed'],'true');
+    assert.equal(element('#response').value,'Henüz göndermediğim yorum');
+    assert.equal(element('#activityBody').scrollTop,123);
+  }
+  assert.ok(ctx.sourceGallery(ctx.activity).includes(ctx.activity.sources[4].image));
+});

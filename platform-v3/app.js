@@ -7,6 +7,7 @@ const stages = {source:'Kaynağı İncele', initial:'İlk Değerlendirme', chat:
 let token = '', work = null, busy = false;
 
 let mobilePane='source';
+let selectedSource=0;
 let draftTimer;
 let draftWrites=Promise.resolve();
 function queueDraft(field) {
@@ -91,6 +92,7 @@ function showTopics(topics) {
       throw Error('Seçilen konu ile çalışma eşleşmedi. Konu listesini yeniden aç.');
     }
     work=opened;
+    selectedSource=0;
     mobilePane=work.state.stage==='source'?'source':'evaluation';
     draw();
     await updateSummarySurvey();
@@ -113,6 +115,20 @@ function sourceHTML(source, topicTitle = '') {
     reference+=` · <a href="${esc(source.image_credit_url)}" target="_blank" rel="noopener noreferrer">Fotoğraf kaydı</a>`;
   }
   return `<article>${source.title !== topicTitle ? `<h3>${esc(source.title)}</h3>` : ''}${image}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
+}
+function sourceGallery(activity) {
+  if (selectedSource >= activity.sources.length) selectedSource=0;
+  const choices=activity.sources.length>1 ? `<nav class="source-choices" aria-label="Kaynak görselleri">${activity.sources.map((s,i)=>`<button type="button" data-source-choice="${i}" aria-pressed="${i===selectedSource}" title="${esc(s.title)}">Görsel ${i+1}</button>`).join('')}</nav>` : '';
+  return `${choices}<div id="selectedSource">${sourceHTML(activity.sources[selectedSource],activity.title)}</div>`;
+}
+function bindSourceGallery() {
+  document.querySelectorAll('[data-source-choice]').forEach(b=>b.onclick=()=>{
+    selectedSource=Number(b.dataset.sourceChoice);
+    $('#selectedSource').innerHTML=sourceHTML(work.activity_snapshot.sources[selectedSource],work.activity_snapshot.title);
+    document.querySelectorAll('[data-source-choice]').forEach(choice=>choice.setAttribute('aria-pressed',String(Number(choice.dataset.sourceChoice)===selectedSource)));
+    document.querySelectorAll('[data-enlarge]').forEach(button=>button.onclick=()=>openImage(button));
+  });
+  document.querySelectorAll('[data-enlarge]').forEach(b=>b.onclick=()=>openImage(b));
 }
 function setPane(pane) {
   mobilePane=pane;
@@ -173,10 +189,11 @@ function draw() {
   const sourceTop=$('.source-pane .pane-body')?.scrollTop || 0;
   frame(true);
   const a=work.activity_snapshot;
-  $('#screen').innerHTML=`<div class="mobile-topic-heading">${topicHeading(a)}</div><div class="mobile-tabs"><button data-pane-choice="source" aria-pressed="${mobilePane==='source'}">Kaynağı İncele</button><button data-pane-choice="evaluation" aria-pressed="${mobilePane==='evaluation'}">Değerlendirmem</button></div><div class="topic-work" data-pane="${mobilePane}"><section class="pane source-pane"><div class="pane-header source-heading">${topicHeading(a)}</div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${a.sources.map(source => sourceHTML(source, a.title)).join('')}</div></section>
+  $('#screen').innerHTML=`<div class="mobile-topic-heading">${topicHeading(a)}</div><div class="mobile-tabs"><button data-pane-choice="source" aria-pressed="${mobilePane==='source'}">Kaynağı İncele</button><button data-pane-choice="evaluation" aria-pressed="${mobilePane==='evaluation'}">Değerlendirmem</button></div><div class="topic-work" data-pane="${mobilePane}"><section class="pane source-pane"><div class="pane-header source-heading">${topicHeading(a)}</div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${sourceGallery(a)}</div></section>
   <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${activityBody()}</div><div class="ai-pending" role="status"><span aria-hidden="true">✦</span> Yanıtınız hazırlanıyor…</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
   document.querySelectorAll('[data-pane-choice]').forEach(b=>b.onclick=()=>setPane(b.dataset.paneChoice));
   document.querySelectorAll('[data-enlarge]').forEach(b=>b.onclick=()=>openImage(b));
+  bindSourceGallery();
   if(sameChat) {
     $('#activityBody').scrollTop=top;
     $('#screen').scrollTop=screenTop;
@@ -225,3 +242,4 @@ $('#closeViewer').onclick=()=>$('#imageViewer').close();
 $('#imageScale').oninput=e=>$('#largeSource').style.width=e.target.value+'%';
 $('#closeAbout').onclick=()=>$('#aboutDialog').close();
 home();
+
