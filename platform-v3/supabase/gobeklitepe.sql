@@ -5,7 +5,7 @@ select id,title,question,sources,demo,pilot from jsonb_to_recordset($topics$
 [
   {
     "id": "20270000-0000-4000-8000-000000000003",
-    "title": "Göbeklitepe",
+    "title": "Göbeklitepe’de Toplumsal Yaşamın İzleri",
     "question": "Göbeklitepe’deki yapı ve buluntulardan hareketle, burada yaşayan insanların toplumsal yaşamları hakkında hangi çıkarımlarda bulunabiliriz?",
     "sources": [
       {

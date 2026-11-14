@@ -5,7 +5,7 @@ select id,title,question,sources,demo,pilot from jsonb_to_recordset($topics$
 [
   {
     "id": "20270000-0000-4000-8000-000000000004",
-    "title": "Osmanlı’da Kahvehane Hayatı",
+    "title": "Osmanlı’da Kahvehaneler ve Gündelik Yaşam",
     "question": "Bu minyatürden hareketle, kahvehanelerin Osmanlı toplumunun gündelik yaşamındaki yeri hakkında hangi çıkarımlarda bulunabiliriz?",
     "demo": false,
     "pilot": true,

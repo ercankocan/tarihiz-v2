@@ -7,7 +7,7 @@ select id,title,question,sources,demo,pilot,sort_order from jsonb_to_recordset($
 [
   {
     "id": "20270000-0000-4000-8000-000000000001",
-    "title": "Altın Elbiseli Adam",
+    "title": "Altın Elbiseli Adam: Giyim ve Kuşam Üzerine",
     "question": "Altın Elbiseli Adam'a ait buluntulardan hareketle, bu kişinin yaşadığı toplum hakkında neler söyleyebiliriz?",
     "sources": [
       {
@@ -38,7 +38,7 @@ select id,title,question,sources,demo,pilot,sort_order from jsonb_to_recordset($
   },
   {
     "id": "20270000-0000-4000-8000-000000000002",
-    "title": "1914'te Doğu Karadeniz'de Eğitim",
+    "title": "1914’te Doğu Karadeniz’de Eğitime Erişim",
     "question": "1914 tarihli bu haritadan hareketle Doğu Karadeniz'deki çocukların eğitim olanakları hakkında hangi çıkarımlarda bulunabiliriz?",
     "sources": [
       {
@@ -75,7 +75,7 @@ select id,title,question,sources,demo,pilot,sort_order from jsonb_to_recordset($
   },
   {
     "id": "20270000-0000-4000-8000-000000000003",
-    "title": "Göbeklitepe",
+    "title": "Göbeklitepe’de Toplumsal Yaşamın İzleri",
     "question": "Göbeklitepe’deki yapı ve buluntulardan hareketle, burada yaşayan insanların toplumsal yaşamları hakkında hangi çıkarımlarda bulunabiliriz?",
     "sources": [
       {
@@ -175,7 +175,7 @@ select id,title,question,sources,demo,pilot,sort_order from jsonb_to_recordset($
   },
   {
     "id": "20270000-0000-4000-8000-000000000004",
-    "title": "Osmanlı’da Kahvehane Hayatı",
+    "title": "Osmanlı’da Kahvehaneler ve Gündelik Yaşam",
     "question": "Bu minyatürden hareketle, kahvehanelerin Osmanlı toplumunun gündelik yaşamındaki yeri hakkında hangi çıkarımlarda bulunabiliriz?",
     "demo": false,
     "pilot": true,
@@ -206,7 +206,7 @@ select id,title,question,sources,demo,pilot,sort_order from jsonb_to_recordset($
   },
   {
     "id": "20270000-0000-4000-8000-000000000005",
-    "title": "Rize’de Köyden Şehre: Ulaşım ve Gündelik Yaşam",
+    "title": "Rize’de Köyden Şehre Ulaşım ve Gündelik Yaşam",
     "question": "Bu fotoğraf ve metinden hareketle, ulaşımın Rize’de köy ve şehir arasındaki gündelik ilişkilerde nasıl bir yeri olduğunu söyleyebiliriz?",
     "demo": false,
     "pilot": true,
