@@ -47,3 +47,17 @@
 .topic-work[data-pane=source] .evaluation-pane,.topic-work[data-pane=evaluation] .source-pane{display:none}
 .mobile-tabs button[aria-pressed=true]{background:var(--navy);color:white}
 }
+
+/* Research question belongs to the source heading, above the image. */
+.source-heading {padding:18px 20px 16px}
+.question-card {margin-top:14px;padding:15px 18px;background:var(--navy);color:#fff;border-left:4px solid var(--gold);border-radius:10px}
+.question-card span {display:block;color:#f2d48c;font-size:10px;font-weight:700;letter-spacing:1.3px;margin-bottom:7px}
+.question-card p {margin:0;font:600 clamp(18px,1.35vw,23px)/1.45 Georgia,serif;overflow-wrap:anywhere}
+.mobile-topic-heading {display:none}
+@media(max-width:760px) {
+  .mobile-topic-heading {display:block;position:sticky;top:-1px;z-index:3;background:var(--cream);padding:0 0 10px}
+  .mobile-topic-heading h2 {font-size:20px;margin:0}
+  .mobile-topic-heading .question-card {margin-top:8px;padding:10px 12px}
+  .mobile-topic-heading .question-card p {font-size:16px;line-height:1.4}
+  .topic-work .source-heading {display:none}
+}
