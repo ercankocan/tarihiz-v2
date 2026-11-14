@@ -1,5 +1,6 @@
-// Katılım ve kayıt istekleri Supabase Edge Function üzerinden yürütülür.
+// Yerel Supabase için varsayılan adres. Paylaşılan test sitesinde ayrı test projesinin adresini girin.
 window.TARIHIZ_CONFIG = {
-  preview: false,
-  apiBase: 'https://mbfhtoduylwxiujbwgup.supabase.co/functions/v1/tarihiz-api'
+  apiBase: ['localhost','127.0.0.1'].includes(location.hostname)
+    ? 'http://127.0.0.1:54321/functions/v1/tarihiz-api' : '',
+  feedbackFormUrl: ''
 };
