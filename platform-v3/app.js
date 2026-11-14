@@ -54,7 +54,7 @@ async function run(fn, thinking=false) {
 }
 function frame(active=false) {
   $('.app').classList.toggle('working',active);
-  $('#research').hidden=!active;
+  $('#research').hidden=true;
   $('#researchText').textContent=active ? work.activity_snapshot.question : '';
   $('#sectionTitle').textContent=active ? work.activity_snapshot.title : 'TARİHSEL KAYNAK DEĞERLENDİRME';
   const stageLabel = active && (stages[work.state.stage] || 'Çalışma tamamlandı');
@@ -96,7 +96,7 @@ function showTopics(topics) {
     await updateSummarySurvey();
   }));
 }
-function sourceHTML(source) {
+function sourceHTML(source, topicTitle = '') {
   // Only teacher-supplied local files are eligible to appear in the pilot.
   const available=source.image_ready===true && /^pilot-gorseller\/[a-z0-9-]+\/kaynak\.jpg$/.test(source.image);
   const image=available
@@ -112,7 +112,7 @@ function sourceHTML(source) {
   if (source.image_credit_url?.startsWith('https://commons.wikimedia.org/wiki/')) {
     reference+=` · <a href="${esc(source.image_credit_url)}" target="_blank" rel="noopener noreferrer">Fotoğraf kaydı</a>`;
   }
-  return `<article><h3>${esc(source.title)}</h3>${image}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
+  return `<article>${source.title !== topicTitle ? `<h3>${esc(source.title)}</h3>` : ''}${image}<dl class="metadata">${metadata}</dl>${reference}<h3>Kaynak Hakkında</h3><p>${esc(source.description || source.text)}</p>${legend}</article>`;
 }
 function setPane(pane) {
   mobilePane=pane;
@@ -163,6 +163,9 @@ function activityBody() {
     (s.suggestFinish?'<p>Son değerlendirmene geçebilirsin.</p>':'')+
     (s.messages.some(m=>m.role==='student')?button('finishChat','Sorgulamayı Bitir'):'');
 }
+function topicHeading(activity) {
+  return `<h2>${esc(activity.title)}</h2><div class="question-card"><span>ARAŞTIRMA SORUSU</span><p>${esc(activity.question)}</p></div>`;
+}
 function draw() {
   const sameChat=$('#activityBody')?.dataset.stage==='chat' && work.state.stage==='chat';
   const top=$('#activityBody')?.scrollTop || 0;
@@ -170,8 +173,8 @@ function draw() {
   const sourceTop=$('.source-pane .pane-body')?.scrollTop || 0;
   frame(true);
   const a=work.activity_snapshot;
-  $('#screen').innerHTML=`<div class="mobile-tabs"><button data-pane-choice="source" aria-pressed="${mobilePane==='source'}">Kaynağı İncele</button><button data-pane-choice="evaluation" aria-pressed="${mobilePane==='evaluation'}">Değerlendirmem</button></div><div class="topic-work" data-pane="${mobilePane}"><section class="pane source-pane"><div class="pane-header"><h2>${esc(a.title)}</h2></div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${a.sources.map(sourceHTML).join('')}</div></section>
-  <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${['source','chat'].includes(work.state.stage)?`<p class="main-question">${esc(a.question)}</p>`: ''}${activityBody()}</div><div class="ai-pending" role="status"><span aria-hidden="true">✦</span> Yanıtınız hazırlanıyor…</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
+  $('#screen').innerHTML=`<div class="mobile-topic-heading">${topicHeading(a)}</div><div class="mobile-tabs"><button data-pane-choice="source" aria-pressed="${mobilePane==='source'}">Kaynağı İncele</button><button data-pane-choice="evaluation" aria-pressed="${mobilePane==='evaluation'}">Değerlendirmem</button></div><div class="topic-work" data-pane="${mobilePane}"><section class="pane source-pane"><div class="pane-header source-heading">${topicHeading(a)}</div><div class="pane-body">${a.demo?'<p class="notice">Demo · Bu etkinlikteki kaynaklar kurmacadır.</p>':''}${a.sources.map(source => sourceHTML(source, a.title)).join('')}</div></section>
+  <section class="pane evaluation-pane"><div class="pane-header"><h2>${stages[work.state.stage] || 'Çalışma özeti'}</h2></div><div class="pane-body" id="activityBody" data-stage="${work.state.stage}">${activityBody()}</div><div class="ai-pending" role="status"><span aria-hidden="true">✦</span> Yanıtınız hazırlanıyor…</div><div class="pane-nav"><button id="topics">Konu Başlıklarına Dön</button></div></section></div>`;
   document.querySelectorAll('[data-pane-choice]').forEach(b=>b.onclick=()=>setPane(b.dataset.paneChoice));
   document.querySelectorAll('[data-enlarge]').forEach(b=>b.onclick=()=>openImage(b));
   if(sameChat) {
